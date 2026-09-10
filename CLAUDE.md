@@ -41,7 +41,7 @@ and `flutter run -d macos` in `apps/fretboard_trainer`. Shell PATH needs
 Run `just analyze` and `just test` before finishing a change. After UI
 changes run `just screenshots` and look at the PNGs; screen capture and the
 VM-service screenshot do not work in this environment, and no iOS simulator
-runtime is installed. Debug builds honour `FRETBOARD_ROUTE=/lesson/<id>` to
+runtime is installed. Debug builds honor `FRETBOARD_ROUTE=/lesson/<id>` to
 open a screen directly.
 
 ## Conventions
