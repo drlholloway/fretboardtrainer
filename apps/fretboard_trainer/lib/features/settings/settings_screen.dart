@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fretboard_theory/fretboard_theory.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../services/progress.dart';
 import '../../services/settings.dart';
 import '../../widgets/fretboard.dart';
+
+/// Tip link shown in About.
+const tipUrl = 'https://buymeacoffee.com/drlholloway';
 
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
@@ -167,6 +171,18 @@ class SettingsScreen extends ConsumerWidget {
               title: Text('Fretboard Trainer'),
               subtitle: Text(
                 'Notes and chords on guitar and bass, one quick drill at a time.',
+              ),
+            ),
+            ListTile(
+              leading: const Icon(Icons.coffee_outlined),
+              title: const Text('Buy me a coffee'),
+              subtitle: const Text(
+                'If this helped you learn the neck, a tip keeps it going.',
+              ),
+              trailing: const Icon(Icons.open_in_new, size: 18),
+              onTap: () => launchUrl(
+                Uri.parse(tipUrl),
+                mode: LaunchMode.externalApplication,
               ),
             ),
             const SizedBox(height: 24),
