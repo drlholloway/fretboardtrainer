@@ -144,7 +144,7 @@ class _FretboardPainter extends CustomPainter {
   final bool compact;
   final Color labelColor;
 
-  /// Base style (for the font family); size and colour are overridden.
+  /// Base style (for the font family); size and color are overridden.
   final TextStyle labelStyle;
 
   static const _inlays = {3, 5, 7, 9, 15, 17, 19, 21};
