@@ -5,17 +5,10 @@ becomes the GitHub Release notes.
 
 ## Unreleased
 
-### Changed
-- The app is called **Fretman** (subtitle: Fretboard Trainer) on the home screen,
-  in the Dock and in Settings → About.
-
-### Added
-- App icon: Mothman on a fretboard, eyes on the twelfth-fret inlays. iOS,
-  Android adaptive and macOS icon sets generated from it.
-
 ## 0.1.0 — 2026-09-10
 
-First usable build.
+First release. The app is called **Fretman** (subtitle: Fretboard Trainer);
+its icon is Mothman on a fretboard, eyes on the twelfth-fret inlays.
 
 ### Added
 - **Drill**: fret → note, note → fret, chord → name and name → chord questions,
@@ -31,3 +24,5 @@ First usable build.
   tuning; open shapes keep their pitches in drop tunings (E in drop D is
   `222100`).
 - macOS build for development, opening in a phone-sized window.
+- Android release builds are signed with the Fretman release key; the
+  Android toolchain is Gradle 9.7.1, AGP 9.4.0 and Kotlin 2.4.20.
