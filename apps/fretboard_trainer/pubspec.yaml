@@ -1,5 +1,5 @@
 name: fretboard_trainer
-description: "Fretboard Trainer. Learn the notes and chords on a guitar or bass fretboard through quick drills and a guided walk-through."
+description: "Fretman, a fretboard trainer. Learn the notes and chords on a guitar or bass fretboard through quick drills and a guided walk-through."
 publish_to: 'none'
 resolution: workspace
 version: 0.1.0+1

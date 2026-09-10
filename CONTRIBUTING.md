@@ -1,6 +1,6 @@
-# Contributing to Fretboard Trainer
+# Contributing to Fretman
 
-Thanks for your interest. Fretboard Trainer is a small project maintained by one
+Thanks for your interest. Fretman (the fretboard trainer) is a small project maintained by one
 person, so the most useful contributions are focused ones: a clear bug report
 with a screenshot, a musically wrong answer with the notes it should be, a fix
 with a test, or a new chord shape with its source.

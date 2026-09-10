@@ -25,7 +25,7 @@ class _FretboardTrainerAppState extends ConsumerState<FretboardTrainerApp> {
   Widget build(BuildContext context) {
     final mode = ref.watch(settingsProvider.select((s) => s.themeMode));
     return MaterialApp.router(
-      title: 'Fretboard Trainer',
+      title: 'Fretman',
       debugShowCheckedModeBanner: false,
       theme: buildTheme(Brightness.light),
       darkTheme: buildTheme(Brightness.dark),

@@ -1,4 +1,8 @@
-# Fretboard Trainer — Project Plan
+# Fretman (Fretboard Trainer) — Project Plan
+
+Product name: **Fretman**, subtitle **Fretboard Trainer** (decided 2026-09-10).
+Internal identifiers (`fretboard_trainer` Dart package, `dev.laneholloway.fretboard_trainer`
+bundle id, `fretboardtrainer-*` release files) are unchanged.
 
 Android and iOS app for learning the notes and chords on a guitar or bass
 fretboard through quick multiple-choice drills and a guided, Duolingo-style

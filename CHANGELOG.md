@@ -1,9 +1,13 @@
 # Changelog
 
-All notable changes to Fretboard Trainer. The section for a tagged version
+All notable changes to Fretman (Fretboard Trainer). The section for a tagged version
 becomes the GitHub Release notes.
 
 ## Unreleased
+
+### Changed
+- The app is called **Fretman** (subtitle: Fretboard Trainer) on the home screen,
+  in the Dock and in Settings → About.
 
 ### Added
 - App icon: Mothman on a fretboard, eyes on the twelfth-fret inlays. iOS,

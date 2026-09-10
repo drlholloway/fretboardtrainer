@@ -70,7 +70,7 @@ jobs:
       - run: cd apps/fretboard_trainer && flutter build macos --release
       - name: sign (ad hoc) and zip
         run: |
-          APP=apps/fretboard_trainer/build/macos/Build/Products/Release/fretboard_trainer.app
+          APP=apps/fretboard_trainer/build/macos/Build/Products/Release/Fretman.app
           codesign --force --deep --preserve-metadata=entitlements --sign - "$APP"
           codesign --verify --deep --strict "$APP"
           ditto -c -k --keepParent "$APP" fretboardtrainer-macos-${{ needs.version.outputs.version }}.zip
@@ -112,6 +112,6 @@ jobs:
           EOF
       - uses: softprops/action-gh-release@v3
         with:
-          name: Fretboard Trainer ${{ needs.version.outputs.version }}
+          name: Fretman ${{ needs.version.outputs.version }}
           body_path: notes.md
           files: dist/*

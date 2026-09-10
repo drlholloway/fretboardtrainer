@@ -1,4 +1,6 @@
-# Fretboard Trainer
+# Fretman (Fretboard Trainer)
+
+Product name is Fretman; internal identifiers stay `fretboard_trainer`.
 
 Flutter monorepo (pub workspace). Pure-Dart music logic lives in
 `packages/fretboard_theory` and must stay free of Flutter; the app in

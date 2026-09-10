@@ -168,9 +168,10 @@ class SettingsScreen extends ConsumerWidget {
             ),
             section('About'),
             const ListTile(
-              title: Text('Fretboard Trainer'),
+              title: Text('Fretman'),
               subtitle: Text(
-                'Notes and chords on guitar and bass, one quick drill at a time.',
+                'Fretboard Trainer. Notes and chords on guitar and bass, '
+                'one quick drill at a time.',
               ),
             ),
             ListTile(
