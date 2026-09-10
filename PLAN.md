@@ -48,7 +48,7 @@ docs/screenshots/            Rendered by `just screenshots`
   in every tuning (slash chords included).
 - **Drills.** `DrillGenerator` cycles through the enabled modes and produces
   `Question`s: fret → note, note → fret, chord → name, name → chord.
-  Distractors are near neighbours (adjacent semitones, wrong frets on the same
+  Distractors are near neighbors (adjacent semitones, wrong frets on the same
   string, chords sharing a root or quality). Seeded and deterministic.
 - **Curriculum.** `Curriculum(kind, strings)` builds the path: one unit per
   string (naturals 0–5, naturals 5–12, sharps and flats, test), the whole
@@ -84,7 +84,7 @@ docs/screenshots/            Rendered by `just screenshots`
   sandbox.
 - CI (`.github/workflows/test.yml`): analyze + tests on Ubuntu, Android debug
   APK, iOS build without codesign on macOS.
-- Debug builds honour `FRETBOARD_ROUTE=/lesson/<id>` to open a screen directly.
+- Debug builds honor `FRETBOARD_ROUTE=/lesson/<id>` to open a screen directly.
 
 ## 4. Later
 

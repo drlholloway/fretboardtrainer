@@ -361,7 +361,7 @@ class _ResultView extends StatelessWidget {
           if (passed)
             OutlinedButton(
               onPressed: onRetry,
-              child: const Text('Practise again'),
+              child: const Text('Practice again'),
             )
           else
             FilledButton(onPressed: onRetry, child: const Text('Try again')),

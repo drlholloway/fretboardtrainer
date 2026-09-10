@@ -177,7 +177,7 @@ class _FretboardPainter extends CustomPainter {
       return boardLeft + (f - firstFret + 1) * cell;
     }
 
-    // Centre x of the cell for fret f (fret 0 = in the nut band).
+    // Center x of the cell for fret f (fret 0 = in the nut band).
     double cellX(int f) {
       if (f == 0) return boardLeft - nutBand / 2;
       if (f == firstFret && !showNut) return boardLeft + cell / 2;

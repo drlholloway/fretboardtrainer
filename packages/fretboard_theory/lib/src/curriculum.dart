@@ -12,7 +12,7 @@ sealed class TeachCard {
   final String body;
 }
 
-/// Shows one string with its notes labelled over a fret range.
+/// Shows one string with its notes labeled over a fret range.
 class StringTeachCard extends TeachCard {
   const StringTeachCard({
     required super.title,
@@ -28,7 +28,7 @@ class StringTeachCard extends TeachCard {
   final bool naturalsOnly;
 }
 
-/// Shows every string with its notes labelled over a fret range.
+/// Shows every string with its notes labeled over a fret range.
 class FretboardTeachCard extends TeachCard {
   const FretboardTeachCard({
     required super.title,

@@ -316,7 +316,7 @@ class DrillGenerator {
     final pool = (natural ? PitchClass.naturals : PitchClass.all)
         .where((pc) => pc != answer.pitchClass)
         .toList();
-    // Always include a near neighbour so the choices are not trivially far.
+    // Always include a near neighbor so the choices are not trivially far.
     final near = _shuffled(pool.where(
       (pc) =>
           answer.pitchClass.intervalTo(pc) <= 2 ||
@@ -340,7 +340,7 @@ class DrillGenerator {
   }
 
   /// The instance of [pc] closest to [reference] so staff positions stay
-  /// in the same neighbourhood.
+  /// in the same neighborhood.
   Pitch _nearestPitch(PitchClass pc, Pitch reference) {
     final up = reference.pitchClass.intervalTo(pc);
     final down = 12 - up;

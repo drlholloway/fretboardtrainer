@@ -6,7 +6,7 @@ void main() {
   final bass = Instrument.standard(InstrumentKind.bass);
 
   group('DrillConfig', () {
-    test('note positions honour range, strings and naturals', () {
+    test('note positions honor range, strings and naturals', () {
       final c = DrillConfig(
         instrument: guitar,
         modes: {DrillMode.fretToNote},

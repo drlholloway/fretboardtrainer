@@ -177,7 +177,7 @@ class SettingsScreen extends ConsumerWidget {
   }
 }
 
-/// A labelled row whose control sits under the label, so wide controls
+/// A labeled row whose control sits under the label, so wide controls
 /// never fight a ListTile for space.
 class _Control extends StatelessWidget {
   const _Control({required this.title, this.subtitle, required this.child});
