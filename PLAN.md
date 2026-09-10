@@ -28,7 +28,7 @@ docs/screenshots/            Rendered by `just screenshots`
 | 3 | Curriculum: per-string units, whole fretboard, open / power / barre chords, drop tuning | done |
 | 4 | App: learn path, lesson flow, free drill, settings, progress | done |
 | 5 | Polish: sound, timing stats, spaced repetition, more chord families | next |
-| 6 | Store release: icons, splash, signing, screenshots | later |
+| 6 | Store release: icon (done), splash, signing, store screenshots | in progress |
 
 ## 1. Theory package (`fretboard_theory`)
 
@@ -86,7 +86,16 @@ docs/screenshots/            Rendered by `just screenshots`
   APK, iOS build without codesign on macOS.
 - Debug builds honor `FRETBOARD_ROUTE=/lesson/<id>` to open a screen directly.
 
-## 4. Later
+## 4. Icon
+
+Drawn by `packaging/icon/make_icon.py` (Pillow) in the same language as the
+Sightings icon: cream ink and a red eye. A fretboard in chord-diagram
+orientation with Mothman spread across the strings; his eyes are the two
+inlay dots of the twelfth fret. `just icons` writes the masters to
+`apps/fretboard_trainer/assets/icon/` and runs `flutter_launcher_icons` for
+iOS, Android (adaptive layers) and macOS.
+
+## 5. Later
 
 - Audio: play the note or strum the chord on reveal; optional ear-training mode.
 - Timing and stats: per-note accuracy heatmap on the fretboard, streaks.
@@ -94,5 +103,5 @@ docs/screenshots/            Rendered by `just screenshots`
 - More chord families (C, G and D shape barres, triads, inversions) and
   bass-specific arpeggio drills.
 - Tab-style rendering option for questions (fret numbers on a tab staff).
-- Store assets: icon, splash, privacy policy; iOS simulator runtime for
-  device screenshots.
+- Store assets: splash, privacy policy; iOS simulator runtime for device
+  screenshots.

@@ -5,6 +5,10 @@ becomes the GitHub Release notes.
 
 ## Unreleased
 
+### Added
+- App icon: Mothman on a fretboard, eyes on the twelfth-fret inlays. iOS,
+  Android adaptive and macOS icon sets generated from it.
+
 ## 0.1.0 — 2026-09-10
 
 First usable build.

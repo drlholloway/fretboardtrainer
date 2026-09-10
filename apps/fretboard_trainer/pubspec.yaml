@@ -18,9 +18,25 @@ dependencies:
   url_launcher: ^6.3.0
 
 dev_dependencies:
+  flutter_launcher_icons: ^0.14.0
   flutter_test:
     sdk: flutter
   flutter_lints: ^6.0.0
 
 flutter:
   uses-material-design: true
+
+# Masters are drawn by packaging/icon/make_icon.py; `just icons` regenerates
+# them and the per-platform icon sets.
+flutter_launcher_icons:
+  android: true
+  ios: true
+  image_path: assets/icon/icon_1024.png
+  image_path_ios: assets/icon/icon_ios.png
+  remove_alpha_ios: true
+  adaptive_icon_background: assets/icon/icon_android_bg.png
+  adaptive_icon_foreground: assets/icon/icon_android_fg.png
+  min_sdk_android: 21
+  macos:
+    generate: true
+    image_path: assets/icon/icon_macos.png
