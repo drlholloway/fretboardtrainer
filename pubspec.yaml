@@ -1,0 +1,8 @@
+name: fretboard_trainer_workspace
+description: Pub workspace root for the Fretboard Trainer monorepo.
+publish_to: none
+environment:
+  sdk: ^3.6.0
+workspace:
+  - packages/fretboard_theory
+  - apps/fretboard_trainer

@@ -1,0 +1,25 @@
+name: fretboard_trainer
+description: "Fretboard Trainer. Learn the notes and chords on a guitar or bass fretboard through quick drills and a guided walk-through."
+publish_to: 'none'
+resolution: workspace
+version: 0.1.0+1
+
+environment:
+  sdk: ^3.13.2
+
+dependencies:
+  flutter:
+    sdk: flutter
+  cupertino_icons: ^1.0.8
+  flutter_riverpod: ^3.4.3
+  fretboard_theory: ^0.1.0
+  go_router: ^18.0.1
+  shared_preferences: ^2.3.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+
+flutter:
+  uses-material-design: true
