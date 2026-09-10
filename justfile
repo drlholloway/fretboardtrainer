@@ -41,7 +41,7 @@ build-ios:
 screenshots:
     cd {{app}} && SCREENSHOTS=1 flutter test test/screenshots --update-goldens
 
-# redraw the icon masters (needs python3 + Pillow) and regenerate every platform's icon set
+# redraw the icon masters (uv fetches Pillow) and regenerate every platform's icon set
 icons:
-    python3 packaging/icon/make_icon.py
+    uv run --with pillow packaging/icon/make_icon.py
     cd {{app}} && dart run flutter_launcher_icons

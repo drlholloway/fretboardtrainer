@@ -88,7 +88,7 @@ docs/screenshots/            Rendered by `just screenshots`
 
 ## 4. Icon
 
-Drawn by `packaging/icon/make_icon.py` (Pillow) in the same language as the
+Drawn by `packaging/icon/make_icon.py` (Pillow, run through `uv`) in the same language as the
 Sightings icon: cream ink and a red eye. A fretboard in chord-diagram
 orientation with Mothman spread across the strings; his eyes are the two
 inlay dots of the twelfth fret. `just icons` writes the masters to
