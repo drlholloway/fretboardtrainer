@@ -1,0 +1,48 @@
+name: Bug report
+description: Something in the app misbehaves or crashes.
+labels: [bug]
+body:
+  - type: input
+    id: version
+    attributes:
+      label: Fretboard Trainer version
+      description: Settings → About, or the release you downloaded.
+      placeholder: "0.1.0"
+    validations:
+      required: true
+  - type: dropdown
+    id: platform
+    attributes:
+      label: Platform
+      options:
+        - iOS
+        - Android
+        - macOS
+        - Built from source
+    validations:
+      required: true
+  - type: input
+    id: os
+    attributes:
+      label: OS version and device
+      placeholder: "iOS 26 on iPhone 16 / Pixel 8, Android 15 / macOS 26 on M2 MacBook Air"
+  - type: input
+    id: instrument
+    attributes:
+      label: Instrument and tuning in Settings
+      placeholder: "Guitar, 6 strings, drop D, flats"
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened
+      description: What you did, what you expected, what you saw instead. A screenshot of the question helps.
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. Open Drill, turn on Chord → Name
+        2. Start
+        3. The chord shown as x32010 is named ...

@@ -6,7 +6,19 @@ guitars and basses through quick drills. It starts with single-note
 recognition in standard tuning, then non-standard tunings (drop D, C standard,
 …), and goes on to chords: open, power and barre.
 
-See [PLAN.md](PLAN.md) for the design and status.
+See [PLAN.md](PLAN.md) for the design and status, and
+[CHANGELOG.md](CHANGELOG.md) for what changed in each version.
+
+## Download
+
+Ready-made builds are on the
+[Releases page](https://github.com/drlholloway/fretboardtrainer/releases):
+
+| Platform | File | Notes |
+|---|---|---|
+| Android | `fretboardtrainer-android-<version>.apk` | Open the APK on the phone; allow installs from the browser once. |
+| macOS | `fretboardtrainer-macos-<version>.zip` | Not notarized: on first launch use System Settings → Privacy & Security → **Open Anyway**. |
+| iOS | TestFlight / App Store | Not on the Releases page. |
 
 | Learn path | Teach card | Fret → Note | Name → Chord |
 |---|---|---|---|
@@ -65,3 +77,14 @@ just screenshots       # re-render docs/screenshots (macOS)
 ```
 
 Without `just`: `cd apps/fretboard_trainer && flutter run`.
+
+## Contributing
+
+Bug reports, wrong-answer reports with the notes you expected, fixes with
+tests and new chord shapes are all welcome. See
+[CONTRIBUTING.md](CONTRIBUTING.md) for the setup and the pull request
+checklist, [SECURITY.md](SECURITY.md) for reporting a security problem, and
+[LICENSE](LICENSE) for the terms (PolyForm Shield 1.0.0).
+
+If the app helps you learn the neck, you can
+[buy me a coffee](https://buymeacoffee.com/drlholloway).

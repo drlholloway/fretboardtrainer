@@ -1,0 +1,39 @@
+name: Feature request
+description: Suggest a drill, a lesson, a chord family or a workflow improvement.
+labels: [enhancement]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Have a look at the "Later" section of [PLAN.md](https://github.com/drlholloway/fretboardtrainer/blob/main/PLAN.md) first; it may already be planned.
+  - type: textarea
+    id: problem
+    attributes:
+      label: What are you trying to learn or do?
+      description: The goal, not the button. "Find the fifth of any root quickly" is more useful than "add a mode".
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: What would help
+      description: How you imagine it working. Sketches and examples from other apps welcome.
+    validations:
+      required: true
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - Note drills
+        - Chord drills
+        - Learning path and lessons
+        - Tunings and instruments
+        - Fretboard or staff display
+        - Progress and stats
+        - Other
+  - type: input
+    id: instrument
+    attributes:
+      label: Your instrument
+      placeholder: "5-string bass, B standard"

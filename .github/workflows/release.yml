@@ -1,0 +1,117 @@
+name: release
+# Tag a commit `vX.Y.Z` (matching apps/fretboard_trainer/pubspec.yaml) to build
+# the Android APK and macOS zip and attach them to a GitHub Release. iOS goes
+# through TestFlight / the App Store and is not built here yet.
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  version:
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.v.outputs.version }}
+    steps:
+      - uses: actions/checkout@v7
+      - id: v
+        run: echo "version=$(grep '^version:' apps/fretboard_trainer/pubspec.yaml | awk '{print $2}' | cut -d+ -f1)" >> "$GITHUB_OUTPUT"
+
+  android:
+    needs: version
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+      - run: dart pub get
+      - name: release signing key
+        env:
+          KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        run: |
+          if [ -z "$KEYSTORE_BASE64" ]; then
+            echo "::warning::ANDROID_KEYSTORE_BASE64 secret missing; the APK will be debug-signed"
+            exit 0
+          fi
+          echo "$KEYSTORE_BASE64" | base64 -d > apps/fretboard_trainer/android/app/fretboardtrainer-release.jks
+          cat > apps/fretboard_trainer/android/key.properties <<EOF
+          storeFile=fretboardtrainer-release.jks
+          storePassword=$KEYSTORE_PASSWORD
+          keyAlias=$KEY_ALIAS
+          keyPassword=$KEY_PASSWORD
+          EOF
+      - run: cd apps/fretboard_trainer && flutter build apk --release
+      - run: cp apps/fretboard_trainer/build/app/outputs/flutter-apk/app-release.apk fretboardtrainer-android-${{ needs.version.outputs.version }}.apk
+      - uses: actions/upload-artifact@v7
+        with:
+          name: android
+          path: fretboardtrainer-android-*.apk
+
+  macos:
+    needs: version
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+      - run: dart pub get
+      - run: cd apps/fretboard_trainer && flutter build macos --release
+      - name: sign (ad hoc) and zip
+        run: |
+          APP=apps/fretboard_trainer/build/macos/Build/Products/Release/fretboard_trainer.app
+          codesign --force --deep --preserve-metadata=entitlements --sign - "$APP"
+          codesign --verify --deep --strict "$APP"
+          ditto -c -k --keepParent "$APP" fretboardtrainer-macos-${{ needs.version.outputs.version }}.zip
+      - uses: actions/upload-artifact@v7
+        with:
+          name: macos
+          path: fretboardtrainer-macos-*.zip
+
+  publish:
+    needs: [version, android, macos]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/download-artifact@v8
+        with:
+          path: dist
+          merge-multiple: true
+      - run: ls -la dist
+      - name: release notes from CHANGELOG
+        run: |
+          V="${{ needs.version.outputs.version }}"
+          # Section for this version: from "## V" up to the next "## " heading.
+          awk -v v="$V" '
+            $0 ~ "^## "v"( |$)" {on=1; next}
+            on && /^## / {exit}
+            on {print}
+          ' CHANGELOG.md > notes.md
+          if [ ! -s notes.md ]; then echo "_No changelog entry for $V._" > notes.md; fi
+          cat >> notes.md <<'EOF'
+
+          ---
+          **Android**: download the APK on the phone and open it (allow installs from the browser once). If an earlier debug-signed build is installed, uninstall it first.
+
+          **macOS** (Apple silicon and Intel): unzip and open the app. The build is not notarized, so on first launch macOS will refuse; open System Settings → Privacy & Security and click **Open Anyway** (older macOS: right-click the app → Open).
+
+          **iOS**: not on the Releases page; it ships through TestFlight and the App Store.
+
+          Full history: [CHANGELOG.md](https://github.com/drlholloway/fretboardtrainer/blob/main/CHANGELOG.md)
+          EOF
+      - uses: softprops/action-gh-release@v3
+        with:
+          name: Fretboard Trainer ${{ needs.version.outputs.version }}
+          body_path: notes.md
+          files: dist/*

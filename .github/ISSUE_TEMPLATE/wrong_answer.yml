@@ -1,0 +1,36 @@
+name: Wrong note or chord
+description: A question's answer, a chord name or a chord shape is musically wrong.
+labels: [theory]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Chords are named from the notes they actually sound, so a wrong name usually means a wrong shape or tuning. The details below let it be turned into a test.
+  - type: input
+    id: version
+    attributes:
+      label: Fretboard Trainer version
+      placeholder: "0.1.0"
+    validations:
+      required: true
+  - type: input
+    id: instrument
+    attributes:
+      label: Instrument, strings and tuning
+      placeholder: "Guitar, 6 strings, E standard"
+    validations:
+      required: true
+  - type: textarea
+    id: shown
+    attributes:
+      label: What the app showed
+      description: The question, the tab or fret position, and the answer it marked correct. A screenshot is ideal.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: What it should be
+      description: The note or chord you expected, and why (for example the notes the shape sounds).
+    validations:
+      required: true
