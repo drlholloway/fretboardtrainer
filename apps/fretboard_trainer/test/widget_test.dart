@@ -128,7 +128,7 @@ void main() {
       ),
       seed: 3,
     );
-    for (var i = 0; i < 4; i++) {
+    for (var i = 0; i < DrillMode.values.length; i++) {
       final q = g.next();
       await tester.pumpWidget(
         MaterialApp(

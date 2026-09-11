@@ -4,11 +4,13 @@ import 'package:meta/meta.dart';
 
 import 'chords.dart';
 import 'instrument.dart';
+import 'octaves.dart';
 import 'pitch.dart';
 
 enum DrillMode {
   fretToNote('Fret → Note', 'See a fretted position, pick the note'),
   noteToFret('Note → Fret', 'See a note, pick where it is'),
+  octave('Octave shapes', 'See a note on one string, find it on a higher one'),
   chordToName('Chord → Name', 'See a chord shape, pick its name'),
   nameToChord('Name → Chord', 'See a chord name, pick its shape');
 
@@ -39,6 +41,7 @@ class DrillConfig {
     this.rootStrings,
     this.minRootFret = 0,
     this.maxRootFret = 12,
+    this.octaveShapes,
     this.choiceCount = 4,
   }) : assert(modes.length > 0);
 
@@ -58,6 +61,10 @@ class DrillConfig {
   final Set<int>? rootStrings;
   final int minRootFret;
   final int maxRootFret;
+
+  /// Octave drills: which string pairs to ask about (null = every shape on
+  /// the instrument).
+  final List<OctaveShape>? octaveShapes;
 
   final int choiceCount;
 
@@ -84,6 +91,7 @@ class DrillConfig {
         rootStrings: rootStrings,
         minRootFret: minRootFret,
         maxRootFret: maxRootFret ?? this.maxRootFret,
+        octaveShapes: octaveShapes,
         choiceCount: choiceCount,
       );
 
@@ -100,6 +108,20 @@ class DrillConfig {
             if (!naturalsOnly ||
                 instrument.pitchAt(FretPosition(s, f)).pitchClass.isNatural)
               FretPosition(s, f),
+      ];
+
+  /// Every (shape, source fret) the octave drills may ask about. Targets are
+  /// kept within fret 12 so the whole shape fits on one screen.
+  List<(OctaveShape, int)> get octavePrompts => [
+        for (final shape in octaveShapes ?? OctaveShape.all(instrument))
+          for (final f in shape.sourceFrets(minFret: minFret, maxFret: 12))
+            if (f <= maxFret &&
+                (!naturalsOnly ||
+                    instrument
+                        .pitchAt(FretPosition(shape.source, f))
+                        .pitchClass
+                        .isNatural))
+              (shape, f),
       ];
 
   /// Every voicing the chord drills may ask about.
@@ -205,6 +227,45 @@ class NoteToFretQuestion extends Question {
   }
 }
 
+/// A note on one string; find the same note an octave up on a higher string.
+class OctaveQuestion extends Question {
+  const OctaveQuestion({
+    required this.instrument,
+    required this.shape,
+    required this.source,
+    required this.choices,
+    required this.correctIndex,
+  });
+
+  final Instrument instrument;
+  final OctaveShape shape;
+  final FretPosition source;
+
+  /// All on the target string.
+  final List<FretPosition> choices;
+  @override
+  final int correctIndex;
+
+  FretPosition get answer => choices[correctIndex];
+  Pitch get pitch => instrument.pitchAt(source);
+
+  @override
+  DrillMode get mode => DrillMode.octave;
+  @override
+  int get choiceCount => choices.length;
+  @override
+  String get promptKey => 'oct:$source:${shape.target}';
+
+  @override
+  String explain(Accidentals acc) {
+    final name = pitch.pitchClass.name(acc);
+    final src = instrument.stringLabel(source.string, acc);
+    final tgt = instrument.stringLabel(shape.target, acc);
+    return '$name on the $src string at fret ${source.fret} is fret '
+        '${answer.fret} on the $tgt string: ${shape.describe()}.';
+  }
+}
+
 class ChordToNameQuestion extends Question {
   const ChordToNameQuestion({
     required this.voicing,
@@ -262,8 +323,10 @@ class DrillGenerator {
   DrillGenerator(this.config, {int? seed}) : _random = Random(seed) {
     _positions = config.notePositions;
     _voicings = config.chordVoicings;
+    _octaves = config.octavePrompts;
     _modes = config.modes.where((m) {
       if (m.isChord) return _voicings.isNotEmpty;
+      if (m == DrillMode.octave) return _octaves.isNotEmpty;
       return _positions.isNotEmpty;
     }).toList();
     if (_modes.isEmpty) {
@@ -275,6 +338,7 @@ class DrillGenerator {
   final Random _random;
   late final List<FretPosition> _positions;
   late final List<ChordVoicing> _voicings;
+  late final List<(OctaveShape, int)> _octaves;
   late final List<DrillMode> _modes;
   String? _lastKey;
   int _modeCursor = 0;
@@ -291,6 +355,7 @@ class DrillGenerator {
       q = switch (mode) {
         DrillMode.fretToNote => _fretToNote(),
         DrillMode.noteToFret => _noteToFret(),
+        DrillMode.octave => _octave(),
         DrillMode.chordToName => _chordToName(),
         DrillMode.nameToChord => _nameToChord(),
       };
@@ -365,6 +430,34 @@ class DrillGenerator {
     return NoteToFretQuestion(
       instrument: instrument,
       target: target,
+      choices: distractors,
+      correctIndex: idx,
+    );
+  }
+
+  OctaveQuestion _octave() {
+    final (shape, f) = _pick(_octaves);
+    final source = FretPosition(shape.source, f);
+    final correct = FretPosition(shape.target, shape.fretFor(f)!);
+    final pc = instrument.pitchAt(source).pitchClass;
+    // Wrong frets on the target string, nearest first, never the same note.
+    final near = <FretPosition>[];
+    for (final d in [1, -1, 2, -2, 3, -3, 4, -4, 5, -5, 6, -6]) {
+      final m = correct.fret + d;
+      if (m < 0 || m > 12) continue;
+      final p = FretPosition(shape.target, m);
+      if (instrument.pitchAt(p).pitchClass == pc) continue;
+      near.add(p);
+    }
+    final distractors = [
+      ..._shuffled(near.take(4)),
+      ..._shuffled(near.skip(4)),
+    ].take(config.choiceCount - 1).toList();
+    final idx = _insertCorrect(distractors, correct);
+    return OctaveQuestion(
+      instrument: instrument,
+      shape: shape,
+      source: source,
       choices: distractors,
       correctIndex: idx,
     );

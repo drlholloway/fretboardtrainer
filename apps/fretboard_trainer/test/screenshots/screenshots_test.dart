@@ -113,6 +113,7 @@ void main() {
       'q-note-to-fret': (pick(DrillMode.noteToFret, 6), null),
       'q-chord-to-name': (pick(DrillMode.chordToName, 7), null),
       'q-name-to-chord': (pick(DrillMode.nameToChord, 8), null),
+      'q-octave': (pick(DrillMode.octave, 10), null),
       'q-wrong-answer': (pick(DrillMode.fretToNote, 9), 0),
     };
     for (final e in cases.entries) {
@@ -230,6 +231,13 @@ void main() {
       ),
     );
     await shot(tester, 'wiki-lesson-failed');
+
+    // Octave shape teach card.
+    final oct = c.lessonById('g6-octaves-a')!;
+    await tester.pumpWidget(
+      wrap(TeachCardView(card: oct.teach().first, instrument: oct.instrument)),
+    );
+    await shot(tester, 'wiki-teach-octave');
 
     // Power chord teach card.
     final power = c.lessonById('g6-power-a')!;

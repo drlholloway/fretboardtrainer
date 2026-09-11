@@ -32,12 +32,14 @@ Ready-made builds are on the
 
 ### Note and chord identification (Drill)
 
-Free practice with four question types, any mix:
+Free practice with five question types, any mix:
 
 - **Fret → Note**: a fretboard with one fretted position; pick the note from
   four choices shown on the staff and by name.
 - **Note → Fret**: a note on the staff; pick which of four marked positions
   sounds it.
+- **Octave shapes**: a note on one string; pick where the same note is on a
+  higher string.
 - **Chord → Name**: a chord shape; pick its name.
 - **Name → Chord**: a chord name; pick its shape.
 
@@ -47,8 +49,9 @@ Options: fret range, natural notes only, which strings, which chord families
 ### Learning the fretboard walk-through (Learn)
 
 A Duolingo-style path. It starts with guitar in E standard and teaches the
-notes on the low E string, then A, D, G, B and high E, with a test at the end
-of each string. Then the whole fretboard mixed, open chords, power chords,
+notes on the low E string and the A string, then the octave shapes that map
+those notes onto every other string, then D, G, B and high E, with a test at
+the end of each unit. Then the whole fretboard mixed, open chords, power chords,
 barre chords, and finally drop D (the lowest string retuned, plus one-finger
 power chords). Bass follows the same path without open and barre chords.
 Lessons unlock in order; a setting opens them all.

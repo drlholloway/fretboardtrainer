@@ -51,13 +51,18 @@ docs/screenshots/            Rendered by `just screenshots`
   actually sounds via `identifyChord`, never from a label, so names are right
   in every tuning (slash chords included).
 - **Drills.** `DrillGenerator` cycles through the enabled modes and produces
-  `Question`s: fret → note, note → fret, chord → name, name → chord.
+  `Question`s: fret → note, note → fret, octave, chord → name, name → chord.
   Distractors are near neighbors (adjacent semitones, wrong frets on the same
   string, chords sharing a root or quality). Seeded and deterministic.
-- **Curriculum.** `Curriculum(kind, strings)` builds the path: one unit per
-  string (naturals 0–5, naturals 5–12, sharps and flats, test), the whole
-  fretboard, then open chords (guitar), power chords, barre chords (guitar),
-  and the drop tuning. Lessons carry their own instrument, so the drop unit
+- **Octave shapes.** `OctaveShape.all(instrument)` lists every pair of
+  strings up to five apart whose octave is within three frets, with the fret
+  offset computed from the tuning (so drop D and 7-strings get their own).
+  The `octave` drill mode shows a note on one string and asks for it on
+  another.
+- **Curriculum.** `Curriculum(kind, strings)` builds the path: the two lowest
+  strings (naturals 0–5, naturals 5–12, sharps and flats, test), then the
+  octave shapes unit, then the remaining strings, the whole fretboard, open
+  chords (guitar), power chords, barre chords (guitar), and the drop tuning. Lessons carry their own instrument, so the drop unit
   teaches in drop D while everything else is in standard.
 
 ## 2. App (`fretboard_trainer`)

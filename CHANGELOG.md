@@ -5,6 +5,15 @@ becomes the GitHub Release notes.
 
 ## Unreleased
 
+### Added
+- **Octave shapes** unit on the learning path, right after the two lowest
+  strings: two strings up and two frets higher (E→D, A→G), three frets higher
+  across the B string (D→B, G→E), the long reaches (E→G, A→B, D→E) and the
+  same fret on the two E strings. Each lesson shows the shape on the
+  fretboard, then asks you to find a note's octave. Bass gets the shapes
+  that exist on four strings.
+- **Octave shapes** question type in the free drill.
+
 ## 0.1.0 — 2026-09-10
 
 First release. The app is called **Fretman** (subtitle: Fretboard Trainer);

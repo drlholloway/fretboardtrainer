@@ -3,6 +3,7 @@ import 'package:meta/meta.dart';
 import 'chords.dart';
 import 'drills.dart';
 import 'instrument.dart';
+import 'octaves.dart';
 import 'pitch.dart';
 
 /// Something shown before the questions of a lesson.
@@ -42,6 +43,20 @@ class FretboardTeachCard extends TeachCard {
   final bool naturalsOnly;
 }
 
+/// Shows one octave shape with a few example notes marked on both strings.
+class OctaveTeachCard extends TeachCard {
+  const OctaveTeachCard({
+    required super.title,
+    required super.body,
+    required this.shape,
+    required this.exampleFrets,
+  });
+  final OctaveShape shape;
+
+  /// Source frets to mark, with their octaves on the target string.
+  final List<int> exampleFrets;
+}
+
 /// Shows one chord voicing with its name.
 class ChordTeachCard extends TeachCard {
   const ChordTeachCard({
@@ -73,6 +88,7 @@ class Lesson {
     this.chordCategories = const {},
     this.rootStrings,
     this.maxRootFret = 12,
+    this.octaveShapes,
   });
 
   final String id;
@@ -97,8 +113,10 @@ class Lesson {
   final Set<ChordCategory> chordCategories;
   final Set<int>? rootStrings;
   final int maxRootFret;
+  final List<OctaveShape>? octaveShapes;
 
-  bool get hasNotes => modes.any((m) => !m.isChord);
+  bool get hasNotes => modes.any((m) => !m.isChord && m != DrillMode.octave);
+  bool get hasOctaves => modes.contains(DrillMode.octave);
   bool get hasChords => modes.any((m) => m.isChord);
 
   DrillConfig get config => DrillConfig(
@@ -112,6 +130,7 @@ class Lesson {
         chordCategories: chordCategories,
         rootStrings: rootStrings,
         maxRootFret: maxRootFret,
+        octaveShapes: octaveShapes,
       );
 
   /// Teaching cards, generated from the lesson spec.
@@ -140,6 +159,11 @@ class Lesson {
         for (final s in ss) {
           cards.add(_stringCard(s, acc));
         }
+      }
+    }
+    if (hasOctaves) {
+      for (final shape in octaveShapes ?? OctaveShape.all(instrument)) {
+        cards.add(_octaveCard(shape, acc));
       }
     }
     if (hasChords) {
@@ -197,6 +221,52 @@ class Lesson {
     );
   }
 
+  OctaveTeachCard _octaveCard(OctaveShape shape, Accidentals acc) {
+    final src = instrument.stringLabel(shape.source, acc);
+    final tgt = instrument.stringLabel(shape.target, acc);
+    // Three natural-note examples spread along the string.
+    final frets = shape
+        .sourceFrets(maxFret: 12)
+        .where(
+          (f) => instrument
+              .pitchAt(FretPosition(shape.source, f))
+              .pitchClass
+              .isNatural,
+        )
+        .toList();
+    final examples = <int>[];
+    for (final i in [0, frets.length ~/ 2, frets.length - 1]) {
+      if (i < frets.length && !examples.contains(frets[i])) {
+        examples.add(frets[i]);
+      }
+    }
+    String at(int string, int f) {
+      final n =
+          instrument.pitchAt(FretPosition(string, f)).pitchClass.name(acc);
+      return f == 0 ? '$n open' : '$n at fret $f';
+    }
+
+    final pairs = [
+      for (final f in examples)
+        '${at(shape.source, f)} on the $src string is '
+            '${at(shape.target, shape.fretFor(f)!)} on the $tgt string',
+    ];
+    final body = StringBuffer()
+      ..write('Every note on the $src string comes back ')
+      ..write(shape.offset == 0 && shape.stringsUp == 5
+          ? 'two octaves higher at the same fret on the $tgt string. '
+          : 'an octave higher on the $tgt string: ${shape.describe()}. ')
+      ..write('${pairs.join('; ')}. ')
+      ..write('So once you know the $src string, the $tgt string is the same '
+          'notes moved by that shape.');
+    return OctaveTeachCard(
+      title: '${src[0].toUpperCase()}${src.substring(1)} string → $tgt string',
+      body: body.toString(),
+      shape: shape,
+      exampleFrets: examples,
+    );
+  }
+
   ChordTeachCard _chordCard(ChordVoicing v, Accidentals acc) {
     final name = v.name.label(acc);
     final body = switch (v.category) {
@@ -248,6 +318,71 @@ class Curriculum {
   }
 
   Unit unitOf(Lesson l) => units.firstWhere((u) => u.id == l.unitId);
+
+  static Unit _octaveUnit(String p, Instrument std, Set<DrillMode> notes) {
+    final uid = '$p-octaves';
+    final shapes = OctaveShape.all(std);
+    // Group by how the shape looks; two-strings-up first, then the rest.
+    final twoUp = shapes.where((s) => s.stringsUp == 2).toList();
+    final byOffset = <int, List<OctaveShape>>{};
+    for (final s in twoUp) {
+      byOffset.putIfAbsent(s.offset, () => []).add(s);
+    }
+    final farther = shapes.where((s) => s.stringsUp > 2).toList();
+    final lessons = <Lesson>[];
+    var n = 0;
+    String letter() => String.fromCharCode('a'.codeUnitAt(0) + n++);
+    for (final entry in byOffset.entries) {
+      final group = entry.value;
+      lessons.add(
+        Lesson(
+          id: '$uid-${letter()}',
+          unitId: uid,
+          title: 'Two strings up, ${entry.key} frets higher',
+          subtitle: group.map((s) => s.label(std)).join(' · '),
+          instrument: std,
+          modes: const {DrillMode.octave},
+          octaveShapes: group,
+          questionCount: 8,
+        ),
+      );
+    }
+    if (farther.isNotEmpty) {
+      lessons.add(
+        Lesson(
+          id: '$uid-${letter()}',
+          unitId: uid,
+          title: 'The long reaches',
+          subtitle: farther.map((s) => s.label(std)).join(' · '),
+          instrument: std,
+          modes: const {DrillMode.octave},
+          octaveShapes: farther,
+          questionCount: 8,
+        ),
+      );
+    }
+    lessons.add(
+      Lesson(
+        id: '$uid-test',
+        unitId: uid,
+        title: 'Octave shapes test',
+        subtitle: 'Every shape, any string',
+        instrument: std,
+        modes: const {DrillMode.octave},
+        octaveShapes: shapes,
+        isTest: true,
+        questionCount: 12,
+        passScore: 0.8,
+      ),
+    );
+    return Unit(
+      id: uid,
+      title: 'Octave shapes',
+      description:
+          'Find any note on a higher string from the one you already know.',
+      lessons: lessons,
+    );
+  }
 
   static List<Unit> _build(InstrumentKind kind, int strings) {
     final std = Instrument.standard(kind, strings: strings);
@@ -317,6 +452,10 @@ class Curriculum {
         ],
       ));
     }
+
+    // Octave shapes, right after the two lowest strings: the tool for
+    // finding every other string's notes from the ones already learned.
+    units.insert(2, _octaveUnit(p, std, notes));
 
     // Whole fretboard.
     units.add(Unit(

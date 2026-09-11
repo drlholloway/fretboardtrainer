@@ -30,6 +30,7 @@ class QuestionView extends StatelessWidget {
   Widget build(BuildContext context) => switch (question) {
     final FretToNoteQuestion q => _fretToNote(context, q),
     final NoteToFretQuestion q => _noteToFret(context, q),
+    final OctaveQuestion q => _octave(context, q),
     final ChordToNameQuestion q => _chordToName(context, q),
     final NameToChordQuestion q => _nameToChord(context, q),
   };
@@ -193,6 +194,63 @@ class QuestionView extends StatelessWidget {
                 child: Text(
                   '${_letters[n]}  ·  ${i.stringLabel(p.string, accidentals)} string, '
                   '${p.isOpen ? 'open' : 'fret ${p.fret}'}',
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            ),
+        ], aspect: 3.2),
+      ],
+    );
+  }
+
+  Widget _octave(BuildContext context, OctaveQuestion q) {
+    final i = q.instrument;
+    final name = q.pitch.pitchClass.name(accidentals);
+    final target = i.stringLabel(q.shape.target, accidentals);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        _prompt(context, 'Find $name on the $target string'),
+        FretboardView(
+          instrument: i,
+          lastFret: 12,
+          leftHanded: leftHanded,
+          markers: [
+            FretMarker(q.source, label: name),
+            for (final (n, p) in q.choices.indexed)
+              FretMarker(
+                p,
+                label: '${n + 1}',
+                color: switch (_border(n)) {
+                  null => stringColor,
+                  final c => c,
+                },
+                textColor: _border(n) == null ? markerText : Colors.white,
+              ),
+          ],
+        ),
+        Padding(
+          padding: const EdgeInsets.symmetric(vertical: 8),
+          child: Text(
+            '$name is on the ${i.stringLabel(q.source.string, accidentals)} '
+            'string at ${q.source.isOpen ? 'the open string' : 'fret ${q.source.fret}'}. '
+            'Where is it on the $target string?',
+            textAlign: TextAlign.center,
+            style: Theme.of(context).textTheme.bodyMedium,
+          ),
+        ),
+        _grid([
+          for (final (n, p) in q.choices.indexed)
+            _choice(
+              context,
+              n,
+              Center(
+                child: Text(
+                  '${n + 1}  ·  ${p.isOpen ? 'open' : 'fret ${p.fret}'}',
                   textAlign: TextAlign.center,
                   style: const TextStyle(
                     fontSize: 15,

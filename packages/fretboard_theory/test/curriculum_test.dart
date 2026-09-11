@@ -8,6 +8,7 @@ void main() {
       expect(c.units.map((u) => u.title), [
         'The low E string',
         'The A string',
+        'Octave shapes',
         'The D string',
         'The G string',
         'The B string',
@@ -25,6 +26,7 @@ void main() {
       expect(c.units.map((u) => u.title), [
         'The E string',
         'The A string',
+        'Octave shapes',
         'The D string',
         'The G string',
         'The whole fretboard',

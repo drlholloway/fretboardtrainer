@@ -258,6 +258,32 @@ class TeachCardView extends ConsumerWidget {
                 ),
         ],
       ),
+      final OctaveTeachCard c => FretboardView(
+        instrument: instrument,
+        firstFret: 0,
+        lastFret: 12,
+        leftHanded: settings.leftHanded,
+        stringSpacing: 30,
+        markers: [
+          for (final f in c.exampleFrets) ...[
+            FretMarker(
+              FretPosition(c.shape.source, f),
+              label: instrument
+                  .pitchAt(FretPosition(c.shape.source, f))
+                  .pitchClass
+                  .name(acc),
+            ),
+            FretMarker(
+              FretPosition(c.shape.target, c.shape.fretFor(f)!),
+              label: instrument
+                  .pitchAt(FretPosition(c.shape.source, f))
+                  .pitchClass
+                  .name(acc),
+              color: stringColor,
+            ),
+          ],
+        ],
+      ),
       final ChordTeachCard c => Column(
         children: [
           FretboardView.chord(
