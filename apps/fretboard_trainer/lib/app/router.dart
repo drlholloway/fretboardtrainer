@@ -39,10 +39,16 @@ GoRouter createRouter() => GoRouter(
     // Full-screen flows sit outside the shell so the tab bar goes away.
     GoRoute(
       path: '/lesson/:id',
-      pageBuilder: (c, s) => MaterialPage(
-        fullscreenDialog: true,
-        child: LessonScreen(lessonId: s.pathParameters['id']!),
-      ),
+      pageBuilder: (c, s) {
+        final id = s.pathParameters['id']!;
+        // Keyed by lesson so "Next lesson" gets a fresh screen rather than
+        // the previous lesson's state.
+        return MaterialPage(
+          key: ValueKey('lesson-$id'),
+          fullscreenDialog: true,
+          child: LessonScreen(key: ValueKey(id), lessonId: id),
+        );
+      },
     ),
     GoRoute(
       path: '/drill/run',

@@ -27,6 +27,18 @@ class _LessonScreenState extends ConsumerState<LessonScreen> {
   int _run = 0;
 
   @override
+  void didUpdateWidget(LessonScreen old) {
+    super.didUpdateWidget(old);
+    if (old.lessonId != widget.lessonId) {
+      // A different lesson in the same screen: start it from the top.
+      _phase = _Phase.teach;
+      _result = null;
+      _passed = false;
+      _run++;
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     final curriculum = ref.watch(curriculumProvider);
     final lesson = curriculum.lessonById(widget.lessonId);

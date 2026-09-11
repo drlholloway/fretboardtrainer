@@ -1,8 +1,12 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fretboard_theory/fretboard_theory.dart';
+import 'package:fretboard_trainer/features/learn/lesson_screen.dart';
 import 'package:fretboard_trainer/main.dart';
+import 'package:go_router/go_router.dart';
 import 'package:fretboard_trainer/widgets/drill_runner.dart';
 import 'package:fretboard_trainer/widgets/fretboard.dart';
 import 'package:fretboard_trainer/widgets/question_view.dart';
@@ -83,6 +87,52 @@ void main() {
       await tester.pumpAndSettle();
     }
     expect(find.textContaining('of 8 correct'), findsOneWidget);
+
+    // "Next" (only offered on a pass) must open the following lesson.
+    final next = find.textContaining('Next: ');
+    if (next.evaluate().isNotEmpty) {
+      await tester.tap(next);
+      await tester.pumpAndSettle();
+      expect(find.text('Naturals, frets 5–12'), findsOneWidget);
+      expect(find.text('Start questions'), findsOneWidget);
+      expect(find.textContaining('of 8 correct'), findsNothing);
+    }
+  });
+
+  testWidgets('next lesson from the result screen starts fresh', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(1170, 2532);
+    tester.view.devicePixelRatio = 3;
+    addTearDown(tester.view.reset);
+    SharedPreferences.setMockInitialValues({'unlockAll': true});
+    await tester.pumpWidget(const ProviderScope(child: FretboardTrainerApp()));
+    await tester.pumpAndSettle();
+    // Open a lesson, skip the cards, then answer until the result shows;
+    // always tapping the first choice gives a mix of right and wrong.
+    await tester.tap(find.text('Naturals, frets 0–5').first);
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Start questions'));
+    await tester.pumpAndSettle();
+    for (var i = 0; i < 8; i++) {
+      await tester.tap(find.byKey(const ValueKey('choice0')));
+      await tester.pump();
+      final cont = find.text('Continue');
+      if (cont.evaluate().isNotEmpty) {
+        await tester.tap(cont);
+      } else {
+        await tester.pump(const Duration(milliseconds: 700));
+      }
+      await tester.pumpAndSettle();
+    }
+    // Whether passed or not, jump to another lesson through the router as
+    // the Next button does, and expect a fresh teach phase.
+    final ctx = tester.element(find.byType(LessonScreen));
+    unawaited(GoRouter.of(ctx).pushReplacement('/lesson/g6-string0-b'));
+    await tester.pumpAndSettle();
+    expect(find.text('Naturals, frets 5–12'), findsOneWidget);
+    expect(find.text('Start questions'), findsOneWidget);
+    expect(find.textContaining('correct'), findsNothing);
   });
 
   testWidgets('drill runner scores answers', (tester) async {
