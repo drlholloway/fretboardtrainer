@@ -1,0 +1,10 @@
+[Desktop Entry]
+Type=Application
+Name=Fretman
+GenericName=Fretboard Trainer
+Comment=Learn the notes and chords on a guitar or bass fretboard
+Exec=fretboard_trainer
+Icon=fretman
+Terminal=false
+Categories=Education;Music;AudioVideo;
+Keywords=guitar;bass;fretboard;notes;chords;music theory;

@@ -1,7 +1,7 @@
 # Fretman
 ### Fretboard Trainer: an interactive guitar and bass fretboard training tool
 
-**Fretman** (Mothman's musical cousin) is an Android and iOS app for learning the fretboard of
+**Fretman** (Mothman's musical cousin) is an Android, iOS, Linux and macOS app for learning the fretboard of
 guitars and basses through quick drills. It starts with single-note
 recognition in standard tuning, then non-standard tunings (drop D, C standard,
 …), and goes on to chords: open, power and barre.
@@ -22,6 +22,9 @@ Ready-made builds are on the
 |---|---|---|
 | Android | `fretboardtrainer-android-<version>.apk` | Open the APK on the phone; allow installs from the browser once. |
 | macOS | `fretboardtrainer-macos-<version>.zip` | Not notarized: on first launch use System Settings → Privacy & Security → **Open Anyway**. |
+| Linux x86-64 (AppImage) | `fretboardtrainer-linux-x64-<version>.AppImage` | `chmod +x`, run. Needs GTK 3 (and `libfuse2` on some distributions). |
+| Linux x86-64 (Flatpak) | `fretboardtrainer-linux-x64-<version>.flatpak` | `flatpak install --user <file>` (needs the Flathub remote for the runtime). |
+| Linux x86-64 (tarball) | `fretboardtrainer-linux-x64-<version>.tar.gz` | Extract, run `./fretboard_trainer`. Needs GTK 3. |
 | iOS | TestFlight / App Store | Not on the Releases page. |
 
 | Learn path | Teach card | Fret → Note | Name → Chord |
@@ -67,7 +70,8 @@ and names every chord from what it actually sounds.
 
 ```
 packages/fretboard_theory/   Pure Dart: notes, tunings, instruments, chord voicings and naming, drills, curriculum
-apps/fretboard_trainer/      Flutter app (iOS, Android; macOS as a dev target)
+apps/fretboard_trainer/      Flutter app (iOS, Android, Linux, macOS)
+packaging/                   AppImage, Flatpak and tarball packaging for Linux
 docs/screenshots/            Rendered screens (`just screenshots`)
 ```
 
@@ -79,7 +83,7 @@ and a JDK.
 ```sh
 dart pub get
 just test              # theory package tests + app widget tests
-just run-ios           # or run-android / run-macos
+just run-ios           # or run-android / run-linux / run-macos
 just screenshots       # re-render docs/screenshots (macOS)
 ```
 

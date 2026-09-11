@@ -1,0 +1,43 @@
+# Flatpak manifest. Packages the prebuilt Linux bundle
+# (apps/fretboard_trainer/build/linux/x64/release/bundle) into the
+# Freedesktop runtime, which provides GTK 3. Build (from the repo root, after
+# `flutter build linux --release`):
+#   flatpak-builder --user --install-deps-from=flathub --force-clean --repo=repo \
+#       build-dir packaging/flatpak/dev.laneholloway.Fretman.yml
+#   flatpak build-bundle repo fretman.flatpak dev.laneholloway.Fretman
+app-id: dev.laneholloway.Fretman
+runtime: org.freedesktop.Platform
+runtime-version: '24.08'
+sdk: org.freedesktop.Sdk
+command: fretman
+finish-args:
+  - --share=ipc
+  - --socket=fallback-x11
+  - --socket=wayland
+  - --device=dri
+  # Opening the tip link in the browser.
+  - --talk-name=org.freedesktop.portal.OpenURI
+modules:
+  - name: fretman
+    buildsystem: simple
+    build-commands:
+      - mkdir -p /app/fretman && cp -r bundle/. /app/fretman/
+      - install -Dm755 fretman.sh /app/bin/fretman
+      - install -Dm644 dev.laneholloway.Fretman.desktop /app/share/applications/dev.laneholloway.Fretman.desktop
+      - install -Dm644 dev.laneholloway.Fretman.metainfo.xml /app/share/metainfo/dev.laneholloway.Fretman.metainfo.xml
+      - install -Dm644 icon_256.png /app/share/icons/hicolor/256x256/apps/dev.laneholloway.Fretman.png
+      - install -Dm644 icon_512.png /app/share/icons/hicolor/512x512/apps/dev.laneholloway.Fretman.png
+    sources:
+      - type: dir
+        path: ../../apps/fretboard_trainer/build/linux/x64/release/bundle
+        dest: bundle
+      - type: file
+        path: fretman.sh
+      - type: file
+        path: dev.laneholloway.Fretman.desktop
+      - type: file
+        path: dev.laneholloway.Fretman.metainfo.xml
+      - type: file
+        path: ../../apps/fretboard_trainer/assets/icon/icon_256.png
+      - type: file
+        path: ../../apps/fretboard_trainer/assets/icon/icon_512.png

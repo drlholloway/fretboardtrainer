@@ -9,6 +9,8 @@ analyzer:
     - android/**
     - ios/**
     - macos/**
+    - linux/**
+    - linux/**
 linter:
   rules:
     prefer_single_quotes: true

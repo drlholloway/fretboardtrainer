@@ -18,7 +18,8 @@ navigation, shared_preferences for settings, a `justfile` and GitHub Actions.
 ```
 pubspec.yaml                 Pub workspace root
 packages/fretboard_theory/   Pure Dart: pitches, tunings, instruments, chords, drills, curriculum
-apps/fretboard_trainer/      Flutter app (iOS, Android; macOS kept as a dev target)
+apps/fretboard_trainer/      Flutter app (iOS, Android, Linux, macOS)
+packaging/                   Linux AppImage / Flatpak / tarball, icon script
 docs/screenshots/            Rendered by `just screenshots`
 ```
 

@@ -31,6 +31,16 @@ run-ios:
 run-android:
     cd {{app}} && flutter run -d android
 
+run-linux:
+    cd {{app}} && flutter run -d linux
+
+build-linux:
+    cd {{app}} && flutter build linux --release
+
+# Linux only: wrap the release bundle as an AppImage (needs appimagetool on PATH)
+build-appimage VERSION: build-linux
+    ./packaging/appimage/build-appimage.sh {{app}}/build/linux/x64/release/bundle {{VERSION}} dist
+
 build-apk:
     cd {{app}} && flutter build apk --release
 

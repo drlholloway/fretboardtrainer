@@ -1,7 +1,8 @@
 name: release
 # Tag a commit `vX.Y.Z` (matching apps/fretboard_trainer/pubspec.yaml) to build
-# the Android APK and macOS zip and attach them to a GitHub Release. iOS goes
-# through TestFlight / the App Store and is not built here yet.
+# the Android APK, the macOS zip and the Linux tarball / AppImage / Flatpak and
+# attach them to a GitHub Release. iOS goes through TestFlight / the App Store
+# and is not built here yet.
 on:
   push:
     tags: ['v*']
@@ -19,6 +20,45 @@ jobs:
       - uses: actions/checkout@v7
       - id: v
         run: echo "version=$(grep '^version:' apps/fretboard_trainer/pubspec.yaml | awk '{print $2}' | cut -d+ -f1)" >> "$GITHUB_OUTPUT"
+
+  linux:
+    needs: version
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+      - run: sudo apt-get update && sudo apt-get install -y clang cmake ninja-build pkg-config libgtk-3-dev
+      - run: dart pub get
+      - run: cd apps/fretboard_trainer && flutter build linux --release
+      - name: package
+        run: |
+          STAGE=fretboardtrainer-linux-x64-${{ needs.version.outputs.version }}
+          mkdir -p $STAGE
+          cp -r apps/fretboard_trainer/build/linux/x64/release/bundle/. $STAGE/
+          cp packaging/linux/README-linux.md $STAGE/README.md
+          tar czf $STAGE.tar.gz $STAGE
+      - name: appimage
+        run: |
+          curl -sSL -o appimagetool https://github.com/AppImage/appimagetool/releases/download/continuous/appimagetool-x86_64.AppImage
+          chmod +x appimagetool
+          APPIMAGETOOL=$PWD/appimagetool packaging/appimage/build-appimage.sh apps/fretboard_trainer/build/linux/x64/release/bundle ${{ needs.version.outputs.version }} .
+      - name: flatpak bundle
+        run: |
+          sudo apt-get install -y flatpak flatpak-builder
+          flatpak remote-add --user --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
+          flatpak install --user -y flathub org.freedesktop.Platform//24.08 org.freedesktop.Sdk//24.08
+          flatpak-builder --user --force-clean --repo=flatpak-repo flatpak-build packaging/flatpak/dev.laneholloway.Fretman.yml
+          flatpak build-bundle flatpak-repo fretboardtrainer-linux-x64-${{ needs.version.outputs.version }}.flatpak dev.laneholloway.Fretman
+          ls -la *.flatpak
+      - uses: actions/upload-artifact@v7
+        with:
+          name: linux
+          path: |
+            fretboardtrainer-linux-x64-*.tar.gz
+            fretboardtrainer-linux-x64-*.flatpak
+            fretboardtrainer-linux-x64-*.AppImage
 
   android:
     needs: version
@@ -80,7 +120,7 @@ jobs:
           path: fretboardtrainer-macos-*.zip
 
   publish:
-    needs: [version, android, macos]
+    needs: [version, linux, android, macos]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
@@ -105,6 +145,8 @@ jobs:
           **Android**: download the APK on the phone and open it (allow installs from the browser once). If an earlier debug-signed build is installed, uninstall it first.
 
           **macOS** (Apple silicon and Intel): unzip and open the app. The build is not notarized, so on first launch macOS will refuse; open System Settings → Privacy & Security and click **Open Anyway** (older macOS: right-click the app → Open).
+
+          **Linux** (x86-64), three options. AppImage: `chmod +x fretboardtrainer-linux-x64-<version>.AppImage` and run it (needs GTK 3 from your distribution and `libfuse2` on some systems). Flatpak: `flatpak install --user fretboardtrainer-linux-x64-<version>.flatpak` (add the Flathub remote first if you haven't: `flatpak remote-add --user --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo`). Tarball: extract and run `./fretboard_trainer`; needs GTK 3.
 
           **iOS**: not on the Releases page; it ships through TestFlight and the App Store.
 

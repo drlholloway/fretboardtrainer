@@ -5,6 +5,10 @@ becomes the GitHub Release notes.
 
 ## Unreleased
 
+### Added
+- **Linux** builds on the Releases page: AppImage, Flatpak bundle and tarball
+  (x86-64), packaged the same way as Sightings.
+
 ## 0.2.0 — 2026-09-11
 
 ### Added

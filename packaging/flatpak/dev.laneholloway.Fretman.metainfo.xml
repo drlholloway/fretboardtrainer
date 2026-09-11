@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop-application">
+  <id>dev.laneholloway.Fretman</id>
+  <name>Fretman</name>
+  <summary>Fretboard Trainer: learn the notes and chords on guitar and bass</summary>
+  <developer_name>Cryptid Effects</developer_name>
+  <metadata_license>CC0-1.0</metadata_license>
+  <project_license>LicenseRef-PolyForm-Shield-1.0.0</project_license>
+  <description>
+    <p>Quick multiple-choice drills for the fretboard: see a fret and name the note, see a note and find it, recognize chord shapes and name them, and find a note's octave on another string.</p>
+    <p>A Duolingo-style learning path starts on the low E string and works through every string, the octave shapes, open chords, power chords, barre chords and drop D. Guitar (6 or 7 strings) and bass (4 to 6), with tuning presets, sharps or flats, and a left-handed fretboard.</p>
+    <p>Everything stays on your computer: no accounts, no analytics.</p>
+  </description>
+  <launchable type="desktop-id">dev.laneholloway.Fretman.desktop</launchable>
+  <url type="homepage">https://github.com/drlholloway/fretboardtrainer</url>
+  <url type="bugtracker">https://github.com/drlholloway/fretboardtrainer/issues</url>
+  <url type="help">https://github.com/drlholloway/fretboardtrainer/wiki</url>
+  <url type="donation">https://buymeacoffee.com/drlholloway</url>
+  <content_rating type="oars-1.1" />
+  <releases>
+    <release version="0.2.0" date="2026-09-11" />
+    <release version="0.1.0" date="2026-09-10" />
+  </releases>
+</component>
