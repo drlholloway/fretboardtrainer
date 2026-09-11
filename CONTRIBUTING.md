@@ -16,6 +16,8 @@ By participating you agree to the [Code of Conduct](CODE_OF_CONDUCT.md).
   to turn it into a test.
 - **Suggest a feature.** Use the *Feature request* form. Check the "Later"
   section of `PLAN.md` first; it may already be planned.
+- **Improve the wiki.** It is a normal GitHub wiki; edits are welcome. American
+  spelling, please, to match the app.
 - **Add a chord shape** to `ChordLibrary` in
   `packages/fretboard_theory/lib/src/chords.dart`, with a test that pins its
   tab and name in standard tuning.

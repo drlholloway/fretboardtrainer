@@ -80,7 +80,7 @@ class _LessonScreenState extends ConsumerState<LessonScreen> {
             });
           },
         ),
-        _Phase.result => _ResultView(
+        _Phase.result => LessonResultView(
           lesson: lesson,
           result: _result!,
           passed: _passed,
@@ -289,8 +289,10 @@ class TeachCardView extends ConsumerWidget {
   }
 }
 
-class _ResultView extends StatelessWidget {
-  const _ResultView({
+/// The end-of-lesson screen: score, pass or fail, misses, and what to do next.
+class LessonResultView extends StatelessWidget {
+  const LessonResultView({
+    super.key,
     required this.lesson,
     required this.result,
     required this.passed,

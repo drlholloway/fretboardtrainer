@@ -2,6 +2,7 @@
 // docs/screenshots. Run with `just screenshots` (sets SCREENSHOTS=1 and
 // --update-goldens); skipped otherwise because the output depends on the
 // fonts installed on the machine.
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -12,6 +13,7 @@ import 'package:fretboard_theory/fretboard_theory.dart';
 import 'package:fretboard_trainer/app/theme.dart';
 import 'package:fretboard_trainer/features/learn/lesson_screen.dart';
 import 'package:fretboard_trainer/main.dart';
+import 'package:fretboard_trainer/widgets/drill_runner.dart';
 import 'package:fretboard_trainer/widgets/question_view.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -150,5 +152,113 @@ void main() {
       ),
     );
     await shot(tester, 'teach-bass-fretboard');
+  }, skip: !enabled);
+
+  testWidgets('wiki: progress, bass, results', (tester) async {
+    await phone(tester);
+
+    // A learner two thirds of the way through the guitar path.
+    final c = Curriculum(InstrumentKind.guitar, 6);
+    final done = c.lessons
+        .takeWhile((l) => !l.unitId.endsWith('-open'))
+        .toList();
+    SharedPreferences.setMockInitialValues({
+      'progress': jsonEncode({
+        for (final l in done)
+          l.id: {'attempts': 1, 'bestScore': 0.9, 'completed': true},
+      }),
+    });
+    await tester.pumpWidget(const ProviderScope(child: FretboardTrainerApp()));
+    await tester.pumpAndSettle();
+    await tester.scrollUntilVisible(
+      find.text('Open chords'),
+      300,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await shot(tester, 'wiki-learn-progress');
+
+    // Lesson results, passed and not.
+    final lesson = c.lessonById('g6-string0-c')!;
+    final next = c.lessonById('g6-string0-test')!;
+    await tester.pumpWidget(
+      ProviderScope(
+        child: MaterialApp(
+          theme: buildTheme(Brightness.light),
+          home: Scaffold(
+            appBar: AppBar(title: Text(lesson.title)),
+            body: LessonResultView(
+              lesson: lesson,
+              result: const DrillResult(
+                correct: 9,
+                total: 10,
+                misses: ['The low E string at fret 6 is A♯.'],
+              ),
+              passed: true,
+              next: next,
+              onRetry: () {},
+              onReview: () {},
+            ),
+          ),
+        ),
+      ),
+    );
+    await shot(tester, 'wiki-lesson-passed');
+    await tester.pumpWidget(
+      ProviderScope(
+        child: MaterialApp(
+          theme: buildTheme(Brightness.light),
+          home: Scaffold(
+            appBar: AppBar(title: Text(lesson.title)),
+            body: LessonResultView(
+              lesson: lesson,
+              result: const DrillResult(
+                correct: 5,
+                total: 10,
+                misses: [
+                  'The low E string at fret 6 is A♯.',
+                  'The low E string at fret 8 is C.',
+                  'D♯ is the low E string at fret 11.',
+                ],
+              ),
+              passed: false,
+              next: null,
+              onRetry: () {},
+              onReview: () {},
+            ),
+          ),
+        ),
+      ),
+    );
+    await shot(tester, 'wiki-lesson-failed');
+
+    // Power chord teach card.
+    final power = c.lessonById('g6-power-a')!;
+    await tester.pumpWidget(
+      wrap(TeachCardView(card: power.teach()[2], instrument: power.instrument)),
+    );
+    await shot(tester, 'wiki-teach-power');
+  }, skip: !enabled);
+
+  testWidgets('wiki: bass in drop D', (tester) async {
+    await phone(tester);
+    SharedPreferences.setMockInitialValues({
+      'kind': 'bass',
+      'tuningId': 'dropdb4',
+      'drillModes': ['fretToNote', 'chordToName'],
+    });
+    await tester.pumpWidget(const ProviderScope(child: FretboardTrainerApp()));
+    await tester.pumpAndSettle();
+    await shot(tester, 'wiki-learn-bass');
+    await tester.tap(find.byIcon(Icons.settings_outlined));
+    await shot(tester, 'wiki-settings-bass-dropd');
+    await tester.tap(find.byIcon(Icons.bolt_outlined));
+    await tester.pumpAndSettle();
+    await tester.scrollUntilVisible(
+      find.text('Start'),
+      300,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.tap(find.text('Start'));
+    await shot(tester, 'wiki-drill-bass');
   }, skip: !enabled);
 }

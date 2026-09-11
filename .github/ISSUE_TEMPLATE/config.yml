@@ -1,5 +1,8 @@
 blank_issues_enabled: true
 contact_links:
+  - name: Help and how-tos
+    url: https://github.com/drlholloway/fretboardtrainer/wiki
+    about: Installation, first steps, the learning path, drills, chords and tunings, troubleshooting.
   - name: Report a security problem
     url: https://github.com/drlholloway/fretboardtrainer/security/advisories/new
     about: Please use private reporting rather than a public issue.

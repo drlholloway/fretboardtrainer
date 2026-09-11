@@ -6,6 +6,10 @@ guitars and basses through quick drills. It starts with single-note
 recognition in standard tuning, then non-standard tunings (drop D, C standard,
 …), and goes on to chords: open, power and barre.
 
+**Help and how-tos:** the [Wiki](https://github.com/drlholloway/fretboardtrainer/wiki)
+covers installation, first steps, the learning path, drills, chords and
+tunings, settings and troubleshooting.
+
 See [PLAN.md](PLAN.md) for the design and status, and
 [CHANGELOG.md](CHANGELOG.md) for what changed in each version.
 
