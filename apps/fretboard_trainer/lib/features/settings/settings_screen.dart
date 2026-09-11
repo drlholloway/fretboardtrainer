@@ -167,9 +167,17 @@ class SettingsScreen extends ConsumerWidget {
               },
             ),
             section('About'),
-            const ListTile(
-              title: Text('Fretman'),
-              subtitle: Text(
+            ListTile(
+              leading: ClipRRect(
+                borderRadius: BorderRadius.circular(10),
+                child: Image.asset(
+                  'assets/icon/icon_512.png',
+                  width: 44,
+                  height: 44,
+                ),
+              ),
+              title: const Text('Fretman'),
+              subtitle: const Text(
                 'Fretboard Trainer. Notes and chords on guitar and bass, '
                 'one quick drill at a time.',
               ),

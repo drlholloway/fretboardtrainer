@@ -2,7 +2,7 @@ name: fretboard_trainer
 description: "Fretman, a fretboard trainer. Learn the notes and chords on a guitar or bass fretboard through quick drills and a guided walk-through."
 publish_to: 'none'
 resolution: workspace
-version: 0.1.0+1
+version: 0.2.0+2
 
 environment:
   sdk: ^3.13.2
@@ -25,6 +25,8 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+  assets:
+    - assets/icon/icon_512.png
 
 # Masters are drawn by packaging/icon/make_icon.py; `just icons` regenerates
 # them and the per-platform icon sets.

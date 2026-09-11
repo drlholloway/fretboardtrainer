@@ -44,31 +44,51 @@ class LearnScreen extends ConsumerWidget {
               color: theme.colorScheme.primaryContainer,
               child: Padding(
                 padding: const EdgeInsets.all(16),
-                child: Row(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            '${settings.kind.label}, ${settings.stringCount} strings',
-                            style: theme.textTheme.titleMedium,
+                    Row(
+                      children: [
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(14),
+                          child: Image.asset(
+                            'assets/icon/icon_512.png',
+                            width: 64,
+                            height: 64,
+                            semanticLabel: 'Fretman',
                           ),
-                          const SizedBox(height: 4),
-                          Text(
-                            next == null
-                                ? 'Every lesson complete. Nice.'
-                                : 'Next: ${curriculum.unitOf(next).title} · ${next.title}',
-                            style: theme.textTheme.bodyMedium,
+                        ),
+                        const SizedBox(width: 14),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                '${settings.kind.label}, ${settings.stringCount} strings',
+                                style: theme.textTheme.titleMedium,
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                next == null
+                                    ? 'Every lesson complete. Nice.'
+                                    : 'Next: ${curriculum.unitOf(next).title} · ${next.title}',
+                                style: theme.textTheme.bodyMedium,
+                              ),
+                            ],
                           ),
-                        ],
-                      ),
+                        ),
+                      ],
                     ),
-                    if (next != null)
-                      FilledButton(
-                        onPressed: () => openLesson(context, next),
-                        child: const Text('Continue'),
+                    if (next != null) ...[
+                      const SizedBox(height: 12),
+                      Align(
+                        alignment: Alignment.centerRight,
+                        child: FilledButton(
+                          onPressed: () => openLesson(context, next),
+                          child: const Text('Continue'),
+                        ),
                       ),
+                    ],
                   ],
                 ),
               ),

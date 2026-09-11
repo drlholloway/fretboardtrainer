@@ -63,6 +63,16 @@ void main() {
 
   Future<void> shot(WidgetTester tester, String name) async {
     await tester.pumpAndSettle();
+    // Widget tests never decode images on their own; do it for the icon.
+    final images = find.byType(Image).evaluate().toList();
+    if (images.isNotEmpty) {
+      await tester.runAsync(() async {
+        for (final e in images) {
+          await precacheImage((e.widget as Image).image, e);
+        }
+      });
+      await tester.pumpAndSettle();
+    }
     await expectLater(
       find.byType(MaterialApp).first,
       matchesGoldenFile('../../../../docs/screenshots/$name.png'),

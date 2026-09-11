@@ -5,14 +5,25 @@ becomes the GitHub Release notes.
 
 ## Unreleased
 
+## 0.2.0 — 2026-09-11
+
 ### Added
 - **Octave shapes** unit on the learning path, right after the two lowest
   strings: two strings up and two frets higher (E→D, A→G), three frets higher
   across the B string (D→B, G→E), the long reaches (E→G, A→B, D→E) and the
   same fret on the two E strings. Each lesson shows the shape on the
   fretboard, then asks you to find a note's octave. Bass gets the shapes
-  that exist on four strings.
+  that exist on four strings. The unit is new in the middle of the path;
+  existing progress is kept and it simply becomes the next thing to do.
 - **Octave shapes** question type in the free drill.
+- The Fretman icon on the Learn screen and in Settings → About.
+- A [wiki](https://github.com/drlholloway/fretboardtrainer/wiki) with
+  installation, first steps, the learning path, drills, chords and tunings,
+  settings and troubleshooting.
+
+### Fixed
+- **Next lesson** on the result screen now opens the next lesson instead of
+  staying on the previous lesson's result.
 
 ## 0.1.0 — 2026-09-10
 
