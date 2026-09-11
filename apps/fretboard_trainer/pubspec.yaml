@@ -2,7 +2,7 @@ name: fretboard_trainer
 description: "Fretman, a fretboard trainer. Learn the notes and chords on a guitar or bass fretboard through quick drills and a guided walk-through."
 publish_to: 'none'
 resolution: workspace
-version: 0.2.0+2
+version: 0.2.1+3
 
 environment:
   sdk: ^3.13.2
