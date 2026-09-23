@@ -10,6 +10,11 @@ becomes the GitHub Release notes.
   Jersey Devil on banjo, the Jackalope on ukulele and El Chupacabra on
   acoustic. Tap to skip. The iOS and Android launch screens now use the
   same night sky instead of white.
+- Stats tab: a day streak, your best run of right answers, and the
+  fretboard as a heatmap of how often you are right (or how fast) at every
+  position, with the notes and chords most worth another look. Every answer
+  in lessons and drills counts; stats are kept per tuning and stay on the
+  device. Settings → Reset stats clears them.
 - Privacy policy (`PRIVACY.md`), linked from Settings → About: nothing is
   collected or sent; settings and progress stay on the device.
 

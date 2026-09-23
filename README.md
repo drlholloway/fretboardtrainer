@@ -59,6 +59,14 @@ barre chords, and finally drop D (the lowest string retuned, plus one-finger
 power chords). Bass follows the same path without open and barre chords.
 Lessons unlock in order; a setting opens them all.
 
+### Where you stand (Stats)
+
+Every answer in Learn and Drill is tallied on the device. The Stats tab shows
+a day streak, your best run of right answers, and the fretboard as a heatmap:
+green where you are solid, red where you miss or hesitate, switchable between
+how often you are right and how fast. Below it, the notes and chords most
+worth another look. Stats are kept per tuning; Settings can reset them.
+
 ## Settings
 
 Instrument (guitar or bass), number of strings (guitar 6 or 7, bass 4 to 6),

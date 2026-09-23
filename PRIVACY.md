@@ -1,6 +1,6 @@
 # Fretman privacy policy
 
-Effective September 22, 2026.
+Effective September 22, 2026 (updated for stats).
 
 Fretman (Fretboard Trainer) is a guitar and bass fretboard trainer for iOS,
 Android, macOS and Linux. It does not collect, send or share any personal
@@ -14,12 +14,16 @@ Everything stays on your device, in the app's own storage:
   left-handed view, theme, lesson unlocking and the free-drill options.
 - **Lesson progress:** for each lesson, whether you have passed it, how
   many attempts you have made and your best score.
+- **Practice stats:** for each fret position and chord, per tuning, how
+  many times it was asked, how many answers were right, the average time to
+  a right answer, when it was last asked and whether the latest few answers
+  were right; plus your day streak and best run of right answers. They
+  drive the Stats tab.
 - **The last launch splash shown,** so the next launch picks a different
   one.
 
 Nothing else is recorded: no names, no email addresses, no location, no
-contacts, no microphone or camera, no device identifiers, and no record of
-your individual answers.
+contacts, no microphone or camera, and no device identifiers.
 
 ## What the app sends
 
@@ -40,8 +44,9 @@ under your account's settings; Fretman does not see or control them.
 
 ## Deleting your data
 
-**Settings → Reset progress** clears your lesson progress. Uninstalling the
-app deletes everything it stored.
+**Settings → Reset progress** clears your lesson progress and
+**Settings → Reset stats** clears the practice stats. Uninstalling the app
+deletes everything it stored.
 
 ## Children
 

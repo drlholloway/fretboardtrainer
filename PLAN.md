@@ -32,7 +32,7 @@ docs/screenshots/            Rendered by `just screenshots`
 | 2 | Drill generation: four question types with sensible distractors | done |
 | 3 | Curriculum: per-string units, whole fretboard, open / power / barre chords, drop tuning | done |
 | 4 | App: learn path, lesson flow, free drill, settings, progress | done |
-| 5 | Polish: sound, timing stats, spaced repetition, more chord families | next |
+| 5 | Polish: timing stats (done), sound, spaced repetition, more chord families | in progress |
 | 6 | Store release: icon (done), splash (done), privacy policy (done), signing, store screenshots | in progress |
 
 ## 1. Theory package (`fretboard_theory`)
@@ -83,6 +83,18 @@ docs/screenshots/            Rendered by `just screenshots`
 - Progress and settings are JSON / primitives in shared_preferences. No
   backend, no accounts.
 
+### Stats
+
+`StatsBook` in the theory package tallies every answer by stat key: the mode
+plus the fret position (note questions) or voicing id (chord questions),
+kept per layout (instrument kind + tuning id, since fret 3 differs in drop
+D). Each tally has attempts, right answers, time to right answers (30 s
+cap), last seen and the last eight results as bits; the book also keeps the
+day streak and best answer streak. `DrillRunner` records every answer from
+lessons and drills; `StatsScreen` shows the streak tiles, a heatmap on
+`FretboardView` (recent accuracy, or speed from 2 s green to 6 s red) and
+the weakest notes and chords. Spaced repetition should read the same book.
+
 ## 3. Testing and tooling
 
 - `just test`: 58 theory tests (pitch spelling, tunings, chord naming, shape
@@ -118,8 +130,8 @@ handoff is seamless. Off in widget tests and when `FRETBOARD_ROUTE` is set.
 ## 5. Later
 
 - Audio: play the note or strum the chord on reveal; optional ear-training mode.
-- Timing and stats: per-note accuracy heatmap on the fretboard, streaks.
-- Spaced repetition on notes the learner misses most.
+- Spaced repetition on notes the learner misses most: weight
+  `DrillGenerator` picks by `StatsBook` (recent accuracy, time, last seen).
 - More chord families (C, G and D shape barres, triads, inversions) and
   bass-specific arpeggio drills.
 - Tab-style rendering option for questions (fret numbers on a tab staff).

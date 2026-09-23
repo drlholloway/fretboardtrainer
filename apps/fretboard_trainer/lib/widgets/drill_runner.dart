@@ -6,6 +6,7 @@ import 'package:fretboard_theory/fretboard_theory.dart';
 
 import '../app/theme.dart';
 import '../services/settings.dart';
+import '../services/stats.dart';
 import 'question_view.dart';
 
 class DrillResult {
@@ -53,11 +54,15 @@ class _DrillRunnerState extends ConsumerState<DrillRunner> {
   final _misses = <String>[];
   Timer? _advance;
 
+  /// Time from showing the question to the answer, for the stats.
+  final _clock = Stopwatch();
+
   @override
   void initState() {
     super.initState();
     _gen = DrillGenerator(widget.config);
     _q = _gen.next();
+    _clock.start();
   }
 
   @override
@@ -69,6 +74,7 @@ class _DrillRunnerState extends ConsumerState<DrillRunner> {
   void _select(int i) {
     if (_selected != null) return;
     final ok = _q.isCorrect(i);
+    final time = _clock.elapsed;
     setState(() {
       _selected = i;
       _answered++;
@@ -80,6 +86,15 @@ class _DrillRunnerState extends ConsumerState<DrillRunner> {
         _misses.add(_q.explain(ref.read(accidentalsProvider)));
       }
     });
+    ref
+        .read(statsProvider.notifier)
+        .record(
+          widget.config.instrument,
+          _q,
+          correct: ok,
+          time: time,
+          answerStreak: _streak,
+        );
     if (ok) _advance = Timer(const Duration(milliseconds: 650), _next);
   }
 
@@ -94,6 +109,7 @@ class _DrillRunnerState extends ConsumerState<DrillRunner> {
       _selected = null;
       _q = _gen.next();
     });
+    _clock.reset();
   }
 
   void _finish() => widget.onFinished(

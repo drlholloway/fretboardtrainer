@@ -5,6 +5,7 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../../services/progress.dart';
 import '../../services/settings.dart';
+import '../../services/stats.dart';
 import '../../widgets/fretboard.dart';
 
 /// Tip link shown in About.
@@ -167,6 +168,35 @@ class SettingsScreen extends ConsumerWidget {
                 );
                 if (ok == true) {
                   await ref.read(progressProvider.notifier).reset();
+                }
+              },
+            ),
+            ListTile(
+              title: const Text('Reset stats'),
+              subtitle: const Text('Forget every answer, time and streak'),
+              trailing: const Icon(Icons.delete_outline),
+              onTap: () async {
+                final ok = await showDialog<bool>(
+                  context: context,
+                  builder: (c) => AlertDialog(
+                    title: const Text('Reset stats?'),
+                    content: const Text(
+                      'The heatmap and streaks start from nothing. Lessons and settings are kept.',
+                    ),
+                    actions: [
+                      TextButton(
+                        onPressed: () => Navigator.pop(c, false),
+                        child: const Text('Cancel'),
+                      ),
+                      FilledButton(
+                        onPressed: () => Navigator.pop(c, true),
+                        child: const Text('Reset'),
+                      ),
+                    ],
+                  ),
+                );
+                if (ok == true) {
+                  await ref.read(statsProvider.notifier).reset();
                 }
               },
             ),

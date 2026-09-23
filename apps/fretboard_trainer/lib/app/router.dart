@@ -11,6 +11,7 @@ import '../features/learn/learn_screen.dart';
 import '../features/learn/lesson_screen.dart';
 import '../features/settings/settings_screen.dart';
 import '../features/shell/app_shell.dart';
+import '../features/stats/stats_screen.dart';
 
 /// Debug builds can be launched straight onto a screen, which is how the
 /// screenshots in `docs/` are taken (`FRETBOARD_ROUTE=/lesson/g6-string0-a`).
@@ -33,6 +34,7 @@ GoRouter createRouter() => GoRouter(
       routes: [
         GoRoute(path: '/learn', builder: (c, s) => const LearnScreen()),
         GoRoute(path: '/drill', builder: (c, s) => const DrillScreen()),
+        GoRoute(path: '/stats', builder: (c, s) => const StatsScreen()),
         GoRoute(path: '/settings', builder: (c, s) => const SettingsScreen()),
       ],
     ),

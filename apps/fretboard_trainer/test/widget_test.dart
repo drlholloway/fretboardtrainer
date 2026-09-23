@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 import 'dart:math';
 
@@ -8,6 +9,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:fretboard_theory/fretboard_theory.dart';
 import 'package:fretboard_trainer/features/learn/lesson_screen.dart';
 import 'package:fretboard_trainer/features/splash/splash.dart';
+import 'package:fretboard_trainer/services/stats.dart';
 import 'package:fretboard_trainer/main.dart';
 import 'package:go_router/go_router.dart';
 import 'package:fretboard_trainer/widgets/drill_runner.dart';
@@ -282,5 +284,83 @@ void main() {
       expect(next, isNot(last));
       last = next;
     }
+  });
+
+  testWidgets('answers in a drill are recorded in the stats', (tester) async {
+    tester.view.physicalSize = const Size(1170, 2532);
+    tester.view.devicePixelRatio = 3;
+    addTearDown(tester.view.reset);
+    await tester.pumpWidget(const ProviderScope(child: FretboardTrainerApp()));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byIcon(Icons.bolt_outlined));
+    await tester.pumpAndSettle();
+    await tester.scrollUntilVisible(
+      find.text('Start'),
+      200,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.tap(find.text('Start'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('choice0')));
+    await tester.pumpAndSettle();
+    final container = ProviderScope.containerOf(
+      tester.element(find.byType(DrillRunner)),
+    );
+    final book = container.read(statsProvider);
+    expect(book.total.attempts, 1);
+    expect(book.currentDayStreak(DateTime.now()), 1);
+  });
+
+  testWidgets('stats screen: empty, then heatmap and weak spots', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(1170, 2532);
+    tester.view.devicePixelRatio = 3;
+    addTearDown(tester.view.reset);
+    await tester.pumpWidget(const ProviderScope(child: FretboardTrainerApp()));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byIcon(Icons.insights_outlined));
+    await tester.pumpAndSettle();
+    expect(find.textContaining('Answer a few questions'), findsOneWidget);
+
+    final guitar = Instrument.standard(InstrumentKind.guitar);
+    final missed = FretToNoteQuestion(
+      instrument: guitar,
+      position: const FretPosition(0, 6),
+      choices: [guitar.pitchAt(const FretPosition(0, 6))],
+      correctIndex: 0,
+    );
+    var book = const StatsBook();
+    for (final ok in [false, false, true]) {
+      book = book.record(
+        guitar,
+        missed,
+        correct: ok,
+        time: const Duration(seconds: 3),
+        at: DateTime.now(),
+        answerStreak: ok ? 1 : 0,
+      );
+    }
+    SharedPreferences.setMockInitialValues({
+      'stats': jsonEncode(book.toJson()),
+    });
+    await tester.pumpWidget(const SizedBox());
+    await tester.pumpWidget(const ProviderScope(child: FretboardTrainerApp()));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byIcon(Icons.insights_outlined));
+    await tester.pumpAndSettle();
+    expect(find.text('day streak'), findsOneWidget);
+    expect(find.text('33%'), findsOneWidget);
+    expect(find.byType(FretboardView), findsOneWidget);
+    await tester.scrollUntilVisible(
+      find.textContaining('low E string, fret 6'),
+      200,
+      scrollable: find.byType(Scrollable).first,
+    );
+    expect(find.text('Notes to work on'), findsOneWidget);
+    expect(find.text('A♯, low E string, fret 6'), findsOneWidget);
+    await tester.tap(find.text('How fast'));
+    await tester.pumpAndSettle();
+    expect(find.textContaining('Only right answers are timed'), findsOneWidget);
   });
 }

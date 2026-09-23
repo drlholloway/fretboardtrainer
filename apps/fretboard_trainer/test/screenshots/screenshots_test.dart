@@ -4,6 +4,7 @@
 // fonts installed on the machine.
 import 'dart:convert';
 import 'dart:io';
+import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -293,5 +294,48 @@ void main() {
       );
       await shot(tester, 'splash-${s.asset}');
     }
+  }, skip: !enabled);
+
+  testWidgets('stats', (tester) async {
+    await phone(tester);
+    // A learner a couple of weeks in: the low strings and first frets are
+    // solid, the high frets and the B string less so.
+    final guitar = Instrument.standard(InstrumentKind.guitar);
+    final rnd = Random(7);
+    final now = DateTime.now();
+    var book = const StatsBook();
+    for (var day = 4; day >= 0; day--) {
+      final at = now.subtract(Duration(days: day));
+      for (var s = 0; s < 6; s++) {
+        for (var f = 0; f <= 12; f++) {
+          if (s >= 3 && f > 7 && day > 1) continue;
+          final skill = 0.97 - s * 0.05 - f * 0.025 - (s == 4 ? 0.12 : 0);
+          final p = FretPosition(s, f);
+          final q = FretToNoteQuestion(
+            instrument: guitar,
+            position: p,
+            choices: [guitar.pitchAt(p)],
+            correctIndex: 0,
+          );
+          book = book.record(
+            guitar,
+            q,
+            correct: rnd.nextDouble() < skill,
+            time: Duration(milliseconds: 900 + s * 500 + f * 250),
+            at: at,
+            answerStreak: 14,
+          );
+        }
+      }
+    }
+    SharedPreferences.setMockInitialValues({
+      'stats': jsonEncode(book.toJson()),
+    });
+    await tester.pumpWidget(const ProviderScope(child: FretboardTrainerApp()));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byIcon(Icons.insights_outlined));
+    await shot(tester, 'stats');
+    await tester.tap(find.text('How fast'));
+    await shot(tester, 'wiki-stats-speed');
   }, skip: !enabled);
 }

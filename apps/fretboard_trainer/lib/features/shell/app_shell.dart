@@ -15,6 +15,12 @@ const _destinations = [
     label: 'Drill',
   ),
   (
+    path: '/stats',
+    icon: Icons.insights_outlined,
+    selected: Icons.insights,
+    label: 'Stats',
+  ),
+  (
     path: '/settings',
     icon: Icons.settings_outlined,
     selected: Icons.settings,
