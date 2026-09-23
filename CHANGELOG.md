@@ -5,28 +5,40 @@ becomes the GitHub Release notes.
 
 ## Unreleased
 
-- Launch splash: a random cryptid plays you in each time the app opens:
-  Mothman on lead guitar, Bigfoot on bass, Nessie on her own neck, the
-  Jersey Devil on banjo, the Jackalope on ukulele and El Chupacabra on
-  acoustic. Tap to skip. The iOS and Android launch screens now use the
-  same night sky instead of white.
-- Stats tab: a day streak, your best run of right answers, and the
-  fretboard as a heatmap of how often you are right (or how fast) at every
-  position, with the notes and chords most worth another look. Every answer
-  in lessons and drills counts; stats are kept per tuning and stay on the
-  device. Settings → Reset stats clears them.
-- Spaced repetition: notes and chords you miss, answer slowly or have not
-  seen in a while come up more often, in lessons and drills, and a miss
-  brings that spot back sooner in the same run. On by default; Settings →
-  Practice weak spots more turns it off.
-- Sound: after each answer you hear the note, the two notes of an octave
-  shape, or the chord strummed, from real recordings: a classical guitar
-  recorded string by string (University of Iowa Electronic Music Studios)
-  and a Jazz bass (Karoryfer Growlybass, CC0). A speaker button replays it
-  after a wrong answer. It mixes with other audio and follows the iPhone
-  silent switch; Settings → Sound turns it off.
-- Privacy policy (`PRIVACY.md`), linked from Settings → About: nothing is
-  collected or sent; settings and progress stay on the device.
+## 0.3.0 — 2026-09-22
+
+### Added
+- **Sound.** After each answer you hear the note, the two notes of an
+  octave shape, or the chord strummed, played on real instruments: a
+  classical guitar recorded one string at a time by the University of Iowa
+  Electronic Music Studios, so a note sounds like the string it is on, and
+  a Jazz bass from Karoryfer Samples. A speaker button replays it after a
+  wrong answer. On iPhone it mixes with whatever else is playing and
+  follows the silent switch. Settings → Sound turns it off.
+- **Stats tab.** Your day streak, your best run of right answers, and the
+  fretboard as a heatmap: green where you are solid, red where you miss,
+  switchable to how fast you answer. Below it, the notes and chords most
+  worth another look. Every answer in lessons and drills counts; stats are
+  kept per tuning, stay on the device, and Settings → Reset stats clears
+  them.
+- **Practice weak spots more.** Within whatever a lesson or drill covers,
+  the notes and chords you miss, answer slowly or have not seen in a while
+  come up more often, and a miss brings that spot back sooner in the same
+  run. On by default; switch it off in Settings.
+- **Launch splash.** A random cryptid plays you in each time the app opens,
+  never the same one twice in a row: Mothman on lead guitar, Bigfoot on
+  bass, Nessie on her own neck, the Jersey Devil on banjo, the Jackalope on
+  ukulele and El Chupacabra on acoustic. Tap to skip.
+- **Privacy policy** ([PRIVACY.md](PRIVACY.md)), linked from Settings →
+  About: nothing is collected or sent; settings, progress and stats stay on
+  the device.
+
+### Changed
+- The iOS and Android launch screens are the night sky of the splash
+  instead of white.
+- Settings has a new **Practice** section (sound, weak spots, unlocking
+  lessons, resetting progress and stats), and About credits the recordings.
+- The Linux Flatpak asks for audio access (PulseAudio) for the new sound.
 
 ## 0.2.1 — 2026-09-11
 
