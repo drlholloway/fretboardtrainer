@@ -259,8 +259,9 @@ def electric_guitar(c, f):
             (-110, -175), (-60, -110), (0, -95), (55, -120), (95, -200),
             (135, -175), (120, -70), (165, 20), (145, 120), (40, 150)]
     c.poly(f.pts(body), RED, smooth=True)
-    c.poly(f.pts([(-30, -80), (-110, -90), (-120, 20), (-60, 70), (20, 40), (10, -60)]),
-           (236, 228, 212, 255), smooth=True)   # pickguard
+    # Pickguard on the lower half of the body (local +x is the floor side).
+    c.poly(f.pts([(30, -80), (110, -90), (120, 20), (60, 70), (-20, 40), (-10, -60)]),
+           (236, 228, 212, 255), smooth=True)
     top = neck(c, f, 400, 48, 21, 6, head_len=90)
     for y in (-50, 10):
         c.poly(f.pts([(-30, y - 10), (30, y - 10), (30, y + 10), (-30, y + 10)]), BLACK)
@@ -275,8 +276,8 @@ def bass_guitar(c, f):
             (-120, -195), (-60, -120), (0, -105), (60, -135), (110, -235),
             (150, -205), (130, -70), (180, 30), (160, 140), (40, 170)]
     c.poly(f.pts(body), (58, 90, 140, 255), smooth=True)
-    c.poly(f.pts([(-40, -95), (-120, -100), (-135, 20), (-70, 90), (30, 50), (15, -70)]),
-           (20, 20, 24, 255), smooth=True)
+    c.poly(f.pts([(40, -95), (120, -100), (135, 20), (70, 90), (-30, 50), (-15, -70)]),
+           (20, 20, 24, 255), smooth=True)   # pickguard, lower half
     top = neck(c, f, 560, 50, 20, 4, head_len=110)
     c.poly(f.pts([(-34, -20), (34, -20), (34, 5), (-34, 5)]), BLACK)
     c.poly(f.pts([(-34, 80), (34, 80), (34, 100), (-34, 100)]), (180, 170, 150, 255))
@@ -313,18 +314,25 @@ def banjo(c, f):
     c.disc(*f(26, -130 - 430 * 0.62), 7 * f.k, BRASS)                     # fifth-string peg
 
 
-def fretting_arm(c, pts, w0, w1):
-    """The arm reaching behind the neck: drawn before the instrument, with a
-    shaded edge so it stays readable against a cream body or wing."""
+def fretting_arm(c, f, shoulder, y, half_w, w0, w1):
+    """The fretting arm, drawn before the instrument: from the shoulder it
+    passes behind the neck to an elbow below it, and the forearm comes back
+    up to a hand under the neck at `y` (local), the way a player holds it.
+    A shaded edge keeps it readable against a cream body or wing."""
+    pts = [shoulder, f(half_w + 80, y + 120), f(half_w + 18, y + 8)]
     c.limb(pts, w0 + 8, w1 + 8, INK_SHADE)
     c.limb(pts, w0, w1, INK)
 
 
 def fingertips(c, f, y, half_w, size=1.0):
-    """Three fingers curling over the top edge of the neck at `y` (local)."""
+    """The hand under the neck at `y` (local) and three fingers curling up
+    over the neck's bottom edge onto the fretboard."""
+    palm = f(half_w + 12 * size, y)
+    c.disc(*palm, 17 * size, INK_SHADE)
+    c.disc(*palm, 13 * size, INK)
     for i in range(3):
-        yy = y + 13 * size - i * 26 * size
-        a, b = f(-half_w - 6, yy), f(-half_w * 0.2, yy - 6 * size)
+        yy = y + 22 * size - i * 22 * size
+        a, b = f(half_w + 8 * size, yy), f(-half_w * 0.25, yy - 6 * size)
         c.limb([a, b], 16 * size, 12 * size, INK_SHADE)
         c.limb([a, b], 11 * size, 8 * size, INK)
 
@@ -377,7 +385,7 @@ def mothman(c):
 
     f = Frame(*P(470, 660), 50, 0.95)
     # Right-handed: fretting arm behind the neck, picking hand over the strings.
-    fretting_arm(c, [P(655, 420), P(760, 470), f(10, -300)], 36, 24)
+    fretting_arm(c, f, P(655, 420), -300, 22, 36, 24)
     electric_guitar(c, f)
     fingertips(c, f, -300, 22)
     c.limb([P(345, 420), P(300, 600), f(-10, 10)], 36, 24, INK)
@@ -405,7 +413,7 @@ def bigfoot(c):
     for ex in (478, 522):
         c.eye(ex, 440, 11, AMBER)
     f = Frame(470, 920, 40, 0.85)
-    fretting_arm(c, [(700, 600), (790, 640), f(20, -420)], 70, 44)
+    fretting_arm(c, f, (700, 600), -420, 23, 70, 44)
     bass_guitar(c, f)
     fingertips(c, f, -420, 23, size=1.5)
     c.limb([(300, 600), (250, 800), f(-20, 20)], 70, 44, INK)
@@ -503,8 +511,8 @@ def jersey_devil(c):
         c.disc(nx, 585, 6, BLACK)
 
     f = Frame(460, 910, 42, 0.85)
-    # Fretting arm behind the neck; only the fingertips come over the top.
-    fretting_arm(c, [(565, 640), (660, 700), f(10, -440)], 32, 22)
+    # Fretting arm behind the neck; the hand comes up from below it.
+    fretting_arm(c, f, (565, 640), -440, 24, 32, 22)
     banjo(c, f)
     fingertips(c, f, -440, 24)
     c.limb([(435, 640), (360, 820), f(-30, 20)], 32, 22, INK)
@@ -550,7 +558,7 @@ def jackalope(c):
     c.poly([(490, 705), (510, 705), (500, 718)], (200, 110, 110, 255))
 
     f = Frame(470, 1030, 50, 1.0)
-    fretting_arm(c, [(600, 820), (680, 860), f(12, -350)], 34, 26)
+    fretting_arm(c, f, (600, 820), -350, 20, 34, 26)
     acoustic_guitar(c, f, scale=0.72, n=4, length=230)
     fingertips(c, f, -350, 20)
     c.limb([(400, 820), (350, 960), f(-20, -60)], 34, 26, INK)
@@ -593,7 +601,7 @@ def chupacabra(c):
         c.poly([(fx - 5, 600), (fx + 5, 600), (fx, 625)], (255, 255, 255, 255))
 
     f = Frame(470, 950, 35, 0.85)
-    fretting_arm(c, [(610, 660), (700, 700), f(12, -560)], 30, 20)
+    fretting_arm(c, f, (610, 660), -560, 20, 30, 20)
     acoustic_guitar(c, f)
     fingertips(c, f, -560, 20, size=0.9)
     c.limb([(420, 660), (340, 850), f(-40, -60)], 30, 20, INK)
