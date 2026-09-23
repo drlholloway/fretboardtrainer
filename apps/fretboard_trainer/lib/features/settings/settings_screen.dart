@@ -10,6 +10,10 @@ import '../../widgets/fretboard.dart';
 /// Tip link shown in About.
 const tipUrl = 'https://buymeacoffee.com/drlholloway';
 
+/// Privacy policy, also given in the App Store and Play listings.
+const privacyUrl =
+    'https://github.com/drlholloway/fretboardtrainer/blob/main/PRIVACY.md';
+
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
 
@@ -191,6 +195,16 @@ class SettingsScreen extends ConsumerWidget {
               trailing: const Icon(Icons.open_in_new, size: 18),
               onTap: () => launchUrl(
                 Uri.parse(tipUrl),
+                mode: LaunchMode.externalApplication,
+              ),
+            ),
+            ListTile(
+              leading: const Icon(Icons.privacy_tip_outlined),
+              title: const Text('Privacy policy'),
+              subtitle: const Text('Nothing leaves your device.'),
+              trailing: const Icon(Icons.open_in_new, size: 18),
+              onTap: () => launchUrl(
+                Uri.parse(privacyUrl),
                 mode: LaunchMode.externalApplication,
               ),
             ),

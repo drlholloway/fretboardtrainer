@@ -33,7 +33,7 @@ docs/screenshots/            Rendered by `just screenshots`
 | 3 | Curriculum: per-string units, whole fretboard, open / power / barre chords, drop tuning | done |
 | 4 | App: learn path, lesson flow, free drill, settings, progress | done |
 | 5 | Polish: sound, timing stats, spaced repetition, more chord families | next |
-| 6 | Store release: icon (done), splash (done), signing, store screenshots | in progress |
+| 6 | Store release: icon (done), splash (done), privacy policy (done), signing, store screenshots | in progress |
 
 ## 1. Theory package (`fretboard_theory`)
 
@@ -123,5 +123,5 @@ handoff is seamless. Off in widget tests and when `FRETBOARD_ROUTE` is set.
 - More chord families (C, G and D shape barres, triads, inversions) and
   bass-specific arpeggio drills.
 - Tab-style rendering option for questions (fret numbers on a tab staff).
-- Store assets: privacy policy; iOS simulator runtime for device
+- Store assets: iOS simulator runtime for device
   screenshots.

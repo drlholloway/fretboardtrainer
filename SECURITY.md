@@ -8,7 +8,8 @@ and the current App Store / Play Store build receive fixes. Upgrade before repor
 ## What counts
 
 Fretboard Trainer runs entirely on your phone or computer. It has no accounts,
-no network calls beyond opening the tip link in your browser, and no telemetry.
+no network calls beyond opening the tip and privacy policy links in your
+browser, and no telemetry.
 Settings and lesson progress are stored locally. The interesting surface is:
 
 - The release pipeline: how builds are produced, signed and published.

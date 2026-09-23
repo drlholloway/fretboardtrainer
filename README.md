@@ -89,6 +89,11 @@ just screenshots       # re-render docs/screenshots (macOS)
 
 Without `just`: `cd apps/fretboard_trainer && flutter run`.
 
+## Privacy
+
+Fretman collects nothing and sends nothing; settings and lesson progress
+stay on your device. See [PRIVACY.md](PRIVACY.md).
+
 ## Contributing
 
 Bug reports, wrong-answer reports with the notes you expected, fixes with

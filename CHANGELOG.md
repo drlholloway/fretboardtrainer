@@ -10,6 +10,8 @@ becomes the GitHub Release notes.
   Jersey Devil on banjo, the Jackalope on ukulele and El Chupacabra on
   acoustic. Tap to skip. The iOS and Android launch screens now use the
   same night sky instead of white.
+- Privacy policy (`PRIVACY.md`), linked from Settings → About: nothing is
+  collected or sent; settings and progress stay on the device.
 
 ## 0.2.1 — 2026-09-11
 

@@ -63,7 +63,9 @@ open a screen directly.
   rename them without saying so in the changelog.
 - Lessons always teach standard tuning first; only the final unit uses the
   drop tuning. The free drill uses whatever tuning is set.
-- No telemetry, accounts or network calls. The tip link is the only URL.
+- No telemetry, accounts or network calls. The tip link and the privacy
+  policy link (`PRIVACY.md` on GitHub) are the only URLs. Keep `PRIVACY.md`
+  true: if the app starts storing or sending anything new, update it.
 - Painters take their base `TextStyle` from the theme so test renders use
   the loaded font; do not construct bare `TextStyle`s in `CustomPainter`s.
 
