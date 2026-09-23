@@ -67,6 +67,10 @@ green where you are solid, red where you miss or hesitate, switchable between
 how often you are right and how fast. Below it, the notes and chords most
 worth another look. Stats are kept per tuning; Settings can reset them.
 
+The same stats drive spaced repetition: within whatever a lesson or drill
+covers, the notes and chords you miss, answer slowly or have not seen for a
+while come up more often (Settings → Practice weak spots more).
+
 ## Settings
 
 Instrument (guitar or bass), number of strings (guitar 6 or 7, bass 4 to 6),

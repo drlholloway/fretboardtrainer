@@ -60,7 +60,15 @@ class _DrillRunnerState extends ConsumerState<DrillRunner> {
   @override
   void initState() {
     super.initState();
-    _gen = DrillGenerator(widget.config);
+    // Spaced repetition reads the live stats, so a miss in this run makes
+    // that spot come back sooner.
+    _gen = DrillGenerator(
+      widget.config,
+      stats: ref.read(settingsProvider).focusWeakSpots
+          ? (key) =>
+                ref.read(statsProvider).forLayout(widget.config.instrument)[key]
+          : null,
+    );
     _q = _gen.next();
     _clock.start();
   }

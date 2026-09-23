@@ -6,6 +6,7 @@ import 'chords.dart';
 import 'instrument.dart';
 import 'octaves.dart';
 import 'pitch.dart';
+import 'stats.dart';
 
 enum DrillMode {
   fretToNote('Fret → Note', 'See a fretted position, pick the note'),
@@ -318,9 +319,22 @@ class NameToChordQuestion extends Question {
       '${target.label(acc)} is ${answer.tab} (${answer.shape.label}).';
 }
 
+/// Looks up the tally for a stat key ([StatKeys.statKey]); null if unseen.
+typedef StatLookup = FactStats? Function(String statKey);
+
 /// Produces questions for a [DrillConfig]. Deterministic for a given seed.
+///
+/// With [stats], picks are weighted by [repetitionWeight] so missed, slow
+/// and long-unseen spots come up more often (spaced repetition). The lookup
+/// is called on every pick, so answers given during the run count at once.
 class DrillGenerator {
-  DrillGenerator(this.config, {int? seed}) : _random = Random(seed) {
+  DrillGenerator(
+    this.config, {
+    int? seed,
+    this.stats,
+    DateTime Function()? clock,
+  })  : _random = Random(seed),
+        _clock = clock ?? DateTime.now {
     _positions = config.notePositions;
     _voicings = config.chordVoicings;
     _octaves = config.octavePrompts;
@@ -335,6 +349,8 @@ class DrillGenerator {
   }
 
   final DrillConfig config;
+  final StatLookup? stats;
+  final DateTime Function() _clock;
   final Random _random;
   late final List<FretPosition> _positions;
   late final List<ChordVoicing> _voicings;
@@ -366,6 +382,22 @@ class DrillGenerator {
 
   T _pick<T>(List<T> items) => items[_random.nextInt(items.length)];
 
+  /// [_pick], weighted by the learner's stats for each item's [key].
+  T _pickFor<T>(List<T> items, String Function(T) key) {
+    final lookup = stats;
+    if (lookup == null) return _pick(items);
+    final now = _clock();
+    final weights = [
+      for (final i in items) repetitionWeight(lookup(key(i)), now),
+    ];
+    var r = _random.nextDouble() * weights.fold(0.0, (a, b) => a + b);
+    for (var i = 0; i < items.length; i++) {
+      r -= weights[i];
+      if (r < 0) return items[i];
+    }
+    return items.last;
+  }
+
   List<T> _shuffled<T>(Iterable<T> items) => items.toList()..shuffle(_random);
 
   int _insertCorrect<T>(List<T> distractors, T correct) {
@@ -375,7 +407,10 @@ class DrillGenerator {
   }
 
   FretToNoteQuestion _fretToNote() {
-    final pos = _pick(_positions);
+    final pos = _pickFor(
+      _positions,
+      (p) => positionStatKey(DrillMode.fretToNote, p),
+    );
     final answer = instrument.pitchAt(pos);
     final natural = config.naturalsOnly && answer.pitchClass.isNatural;
     final pool = (natural ? PitchClass.naturals : PitchClass.all)
@@ -413,7 +448,10 @@ class DrillGenerator {
   }
 
   NoteToFretQuestion _noteToFret() {
-    final pos = _pick(_positions);
+    final pos = _pickFor(
+      _positions,
+      (p) => positionStatKey(DrillMode.noteToFret, p),
+    );
     final target = instrument.pitchAt(pos);
     final others = _positions
         .where((p) => instrument.pitchAt(p).pitchClass != target.pitchClass)
@@ -436,7 +474,13 @@ class DrillGenerator {
   }
 
   OctaveQuestion _octave() {
-    final (shape, f) = _pick(_octaves);
+    final (shape, f) = _pickFor(
+      _octaves,
+      (o) => positionStatKey(
+        DrillMode.octave,
+        FretPosition(o.$1.target, o.$1.fretFor(o.$2)!),
+      ),
+    );
     final source = FretPosition(shape.source, f);
     final correct = FretPosition(shape.target, shape.fretFor(f)!);
     final pc = instrument.pitchAt(source).pitchClass;
@@ -464,7 +508,10 @@ class DrillGenerator {
   }
 
   ChordToNameQuestion _chordToName() {
-    final v = _pick(_voicings);
+    final v = _pickFor(
+      _voicings,
+      (v) => voicingStatKey(DrillMode.chordToName, v),
+    );
     final correct = v.name;
     final names = <String, ChordName>{};
     for (final other in _voicings) {
@@ -499,7 +546,10 @@ class DrillGenerator {
   }
 
   NameToChordQuestion _nameToChord() {
-    final v = _pick(_voicings);
+    final v = _pickFor(
+      _voicings,
+      (v) => voicingStatKey(DrillMode.nameToChord, v),
+    );
     final target = v.name;
     var pool = _voicings.where((o) => o.name.label() != target.label());
     if (pool.length < config.choiceCount - 1) {

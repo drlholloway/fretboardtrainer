@@ -12,6 +12,7 @@ class Settings {
     this.leftHanded = false,
     this.themeMode = 'system',
     this.unlockAll = false,
+    this.focusWeakSpots = true,
     this.drillModes = const {DrillMode.fretToNote, DrillMode.noteToFret},
     this.drillMaxFret = 12,
     this.drillNaturalsOnly = false,
@@ -37,6 +38,9 @@ class Settings {
 
   /// Let the learner open any lesson without finishing the previous one.
   final bool unlockAll;
+
+  /// Spaced repetition: weight questions by the learner's stats.
+  final bool focusWeakSpots;
 
   // Remembered free-drill options.
   final Set<DrillMode> drillModes;
@@ -73,6 +77,7 @@ class Settings {
     bool? leftHanded,
     String? themeMode,
     bool? unlockAll,
+    bool? focusWeakSpots,
     Set<DrillMode>? drillModes,
     int? drillMaxFret,
     bool? drillNaturalsOnly,
@@ -88,6 +93,7 @@ class Settings {
     leftHanded: leftHanded ?? this.leftHanded,
     themeMode: themeMode ?? this.themeMode,
     unlockAll: unlockAll ?? this.unlockAll,
+    focusWeakSpots: focusWeakSpots ?? this.focusWeakSpots,
     drillModes: drillModes ?? this.drillModes,
     drillMaxFret: drillMaxFret ?? this.drillMaxFret,
     drillNaturalsOnly: drillNaturalsOnly ?? this.drillNaturalsOnly,
@@ -119,6 +125,7 @@ class SettingsNotifier extends Notifier<Settings> {
       leftHanded: p.getBool('leftHanded') ?? false,
       themeMode: p.getString('themeMode') ?? 'system',
       unlockAll: p.getBool('unlockAll') ?? false,
+      focusWeakSpots: p.getBool('focusWeakSpots') ?? true,
       drillModes: {
         for (final m
             in p.getStringList('drillModes') ??
@@ -156,6 +163,7 @@ class SettingsNotifier extends Notifier<Settings> {
     await p.setBool('leftHanded', s.leftHanded);
     await p.setString('themeMode', s.themeMode);
     await p.setBool('unlockAll', s.unlockAll);
+    await p.setBool('focusWeakSpots', s.focusWeakSpots);
     await p.setStringList('drillModes', [for (final m in s.drillModes) m.name]);
     await p.setInt('drillMaxFret', s.drillMaxFret);
     await p.setBool('drillNaturalsOnly', s.drillNaturalsOnly);

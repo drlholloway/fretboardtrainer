@@ -135,7 +135,16 @@ class SettingsScreen extends ConsumerWidget {
                     n.edit((s) => s.copyWith(themeMode: v.first)),
               ),
             ),
-            section('Learning path'),
+            section('Practice'),
+            SwitchListTile(
+              value: s.focusWeakSpots,
+              title: const Text('Practice weak spots more'),
+              subtitle: const Text(
+                'Notes and chords you miss, answer slowly or have not seen '
+                'in a while come up more often, in lessons and drills',
+              ),
+              onChanged: (v) => n.edit((s) => s.copyWith(focusWeakSpots: v)),
+            ),
             SwitchListTile(
               value: s.unlockAll,
               title: const Text('Unlock every lesson'),

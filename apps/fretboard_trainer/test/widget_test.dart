@@ -363,4 +363,34 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.textContaining('Only right answers are timed'), findsOneWidget);
   });
+
+  testWidgets('weak-spot practice is on by default and can be turned off', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(1170, 2532);
+    tester.view.devicePixelRatio = 3;
+    addTearDown(tester.view.reset);
+    await tester.pumpWidget(const ProviderScope(child: FretboardTrainerApp()));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byIcon(Icons.settings_outlined));
+    await tester.pumpAndSettle();
+    final tile = find.widgetWithText(
+      SwitchListTile,
+      'Practice weak spots more',
+    );
+    await tester.scrollUntilVisible(
+      tile,
+      200,
+      scrollable: find.byType(Scrollable).first,
+    );
+    // Middle of the screen, clear of the navigation bar, before tapping.
+    await Scrollable.ensureVisible(tester.element(tile), alignment: 0.5);
+    await tester.pumpAndSettle();
+    expect(tester.widget<SwitchListTile>(tile).value, isTrue);
+    await tester.tap(tile);
+    await tester.pumpAndSettle();
+    expect(tester.widget<SwitchListTile>(tile).value, isFalse);
+    final prefs = await SharedPreferences.getInstance();
+    expect(prefs.getBool('focusWeakSpots'), isFalse);
+  });
 }

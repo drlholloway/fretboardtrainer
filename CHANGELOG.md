@@ -15,6 +15,10 @@ becomes the GitHub Release notes.
   position, with the notes and chords most worth another look. Every answer
   in lessons and drills counts; stats are kept per tuning and stay on the
   device. Settings → Reset stats clears them.
+- Spaced repetition: notes and chords you miss, answer slowly or have not
+  seen in a while come up more often, in lessons and drills, and a miss
+  brings that spot back sooner in the same run. On by default; Settings →
+  Practice weak spots more turns it off.
 - Privacy policy (`PRIVACY.md`), linked from Settings → About: nothing is
   collected or sent; settings and progress stay on the device.
 

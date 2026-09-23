@@ -155,4 +155,83 @@ void main() {
       expect(back.bestAnswerStreak, 4);
     });
   });
+
+  group('spaced repetition', () {
+    final now = DateTime(2026, 9, 10, 12);
+    FactStats seen(List<bool> answers,
+        {Duration time = const Duration(seconds: 1), DateTime? at}) {
+      var f = const FactStats();
+      for (final ok in answers) {
+        f = f.record(correct: ok, time: time, at: at ?? now);
+      }
+      return f;
+    }
+
+    test('misses outweigh new spots, which outweigh known ones', () {
+      final known = repetitionWeight(seen([true, true, true]), now);
+      final fresh = repetitionWeight(null, now);
+      final missed = repetitionWeight(seen([true, false, false]), now);
+      expect(known, 1);
+      expect(fresh, greaterThan(known));
+      expect(missed, greaterThan(fresh));
+    });
+
+    test('slow and long-unseen spots weigh more', () {
+      final quick = repetitionWeight(seen([true, true]), now);
+      final slow = repetitionWeight(
+          seen([true, true], time: const Duration(seconds: 6)), now);
+      final old = repetitionWeight(
+          seen([true, true], at: now.subtract(const Duration(days: 10))), now);
+      expect(slow, greaterThan(quick));
+      expect(old, greaterThan(quick));
+    });
+
+    test('the generator asks about weak spots more often', () {
+      final config = DrillConfig(
+        instrument: guitar,
+        modes: {DrillMode.fretToNote},
+        strings: {0},
+      );
+      final positions = config.notePositions;
+      final weak = const FretPosition(0, 5);
+      final tallies = {
+        for (final p in positions)
+          positionStatKey(DrillMode.fretToNote, p):
+              p == weak ? seen([false, false, false]) : seen([true, true]),
+      };
+      final gen = DrillGenerator(config,
+          seed: 3, stats: (k) => tallies[k], clock: () => now);
+      var hits = 0;
+      const n = 3000;
+      for (var i = 0; i < n; i++) {
+        final q = gen.next() as FretToNoteQuestion;
+        if (q.position == weak) hits++;
+      }
+      // Uniform would be about n / 13; the weak spot should be far above.
+      expect(hits, greaterThan(3 * n / positions.length));
+    });
+
+    test('answers during the run change the odds at once', () {
+      final config = DrillConfig(
+        instrument: guitar,
+        modes: {DrillMode.chordToName},
+        chordCategories: {ChordCategory.open},
+      );
+      final tallies = <String, FactStats>{};
+      for (final v in config.chordVoicings) {
+        tallies[voicingStatKey(DrillMode.chordToName, v)] = seen([true, true]);
+      }
+      final gen = DrillGenerator(config,
+          seed: 5, stats: (k) => tallies[k], clock: () => now);
+      final target = config.chordVoicings.first;
+      tallies[voicingStatKey(DrillMode.chordToName, target)] =
+          seen([false, false, false]);
+      var hits = 0;
+      for (var i = 0; i < 1000; i++) {
+        final q = gen.next() as ChordToNameQuestion;
+        if (q.voicing == target) hits++;
+      }
+      expect(hits, greaterThan(3 * 1000 / config.chordVoicings.length));
+    });
+  });
 }

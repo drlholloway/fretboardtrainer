@@ -32,7 +32,7 @@ docs/screenshots/            Rendered by `just screenshots`
 | 2 | Drill generation: four question types with sensible distractors | done |
 | 3 | Curriculum: per-string units, whole fretboard, open / power / barre chords, drop tuning | done |
 | 4 | App: learn path, lesson flow, free drill, settings, progress | done |
-| 5 | Polish: timing stats (done), sound, spaced repetition, more chord families | in progress |
+| 5 | Polish: timing stats (done), spaced repetition (done), sound, more chord families | in progress |
 | 6 | Store release: icon (done), splash (done), privacy policy (done), signing, store screenshots | in progress |
 
 ## 1. Theory package (`fretboard_theory`)
@@ -93,7 +93,14 @@ cap), last seen and the last eight results as bits; the book also keeps the
 day streak and best answer streak. `DrillRunner` records every answer from
 lessons and drills; `StatsScreen` shows the streak tiles, a heatmap on
 `FretboardView` (recent accuracy, or speed from 2 s green to 6 s red) and
-the weakest notes and chords. Spaced repetition should read the same book.
+the weakest notes and chords.
+
+Spaced repetition: `DrillGenerator` takes an optional `StatLookup` and
+weights every pick by `repetitionWeight` (1 for right, quick and recent; up
+to 5 more for recent misses, 1.5 for slow answers, 1.5 for a week unseen; 2
+for never asked). Scope never changes, only the odds, and the lookup is live
+so a miss comes back within the run. `DrillRunner` passes it unless
+Settings → Practice weak spots more is off.
 
 ## 3. Testing and tooling
 
@@ -130,8 +137,6 @@ handoff is seamless. Off in widget tests and when `FRETBOARD_ROUTE` is set.
 ## 5. Later
 
 - Audio: play the note or strum the chord on reveal; optional ear-training mode.
-- Spaced repetition on notes the learner misses most: weight
-  `DrillGenerator` picks by `StatsBook` (recent accuracy, time, last seen).
 - More chord families (C, G and D shape barres, triads, inversions) and
   bass-specific arpeggio drills.
 - Tab-style rendering option for questions (fret numbers on a tab staff).

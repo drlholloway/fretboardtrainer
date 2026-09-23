@@ -18,7 +18,7 @@ Everything stays on your device, in the app's own storage:
   many times it was asked, how many answers were right, the average time to
   a right answer, when it was last asked and whether the latest few answers
   were right; plus your day streak and best run of right answers. They
-  drive the Stats tab.
+  drive the Stats tab and which questions come up more often.
 - **The last launch splash shown,** so the next launch picks a different
   one.
 

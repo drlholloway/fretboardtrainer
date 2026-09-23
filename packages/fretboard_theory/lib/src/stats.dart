@@ -25,9 +25,33 @@ extension StatKeys on Question {
 
   String get statKey {
     final p = statPosition;
-    if (p != null) return '${mode.name}:${p.string}:${p.fret}';
-    return '${mode.name}:${statVoicing!.id}';
+    if (p != null) return positionStatKey(mode, p);
+    return voicingStatKey(mode, statVoicing!);
   }
+}
+
+String positionStatKey(DrillMode mode, FretPosition p) =>
+    '${mode.name}:${p.string}:${p.fret}';
+
+String voicingStatKey(DrillMode mode, ChordVoicing v) => '${mode.name}:${v.id}';
+
+/// How much more often to ask about something, for spaced repetition.
+///
+/// 1 is a spot answered right, quickly and recently. Misses in the latest
+/// answers count most, then slow answers and time since last asked; spots
+/// never asked come up a little more than known ones so they get
+/// introduced.
+double repetitionWeight(FactStats? f, DateTime now) {
+  if (f == null || f.attempts == 0) return 2;
+  final miss = 1 - f.recentAccuracy;
+  final time = f.averageTime;
+  final slow = time == null
+      ? 0.5
+      : ((time.inMilliseconds - 2000) / 4000).clamp(0.0, 1.0);
+  final days =
+      (now.millisecondsSinceEpoch - f.lastSeenMs) / Duration.millisecondsPerDay;
+  final stale = (days / 7).clamp(0.0, 1.0);
+  return 1 + 5 * miss + 1.5 * slow + 1.5 * stale;
 }
 
 /// Stats are kept per instrument and tuning: fret 3 on the low string is a
