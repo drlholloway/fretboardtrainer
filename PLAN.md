@@ -33,7 +33,7 @@ docs/screenshots/            Rendered by `just screenshots`
 | 3 | Curriculum: per-string units, whole fretboard, open / power / barre chords, drop tuning | done |
 | 4 | App: learn path, lesson flow, free drill, settings, progress | done |
 | 5 | Polish: sound, timing stats, spaced repetition, more chord families | next |
-| 6 | Store release: icon (done), splash, signing, store screenshots | in progress |
+| 6 | Store release: icon (done), splash (done), signing, store screenshots | in progress |
 
 ## 1. Theory package (`fretboard_theory`)
 
@@ -105,6 +105,16 @@ inlay dots of the twelfth fret. `just icons` writes the masters to
 `apps/fretboard_trainer/assets/icon/` and runs `flutter_launcher_icons` for
 iOS, Android (adaptive layers) and macOS.
 
+### Splash
+
+`packaging/splash/make_splash.py` (`just splash`) draws six night scenes in
+the icon's cream-ink style, each a cryptid playing a fretted instrument, to
+`apps/fretboard_trainer/assets/splash/`. `SplashGate` shows one at random
+over the first screen for about two seconds (tap skips it); the pictures
+carry no text, the wordmark and caption are laid over them in Flutter. The
+iOS and Android launch screens are the same night sky (`#161018`) so the
+handoff is seamless. Off in widget tests and when `FRETBOARD_ROUTE` is set.
+
 ## 5. Later
 
 - Audio: play the note or strum the chord on reveal; optional ear-training mode.
@@ -113,5 +123,5 @@ iOS, Android (adaptive layers) and macOS.
 - More chord families (C, G and D shape barres, triads, inversions) and
   bass-specific arpeggio drills.
 - Tab-style rendering option for questions (fret numbers on a tab staff).
-- Store assets: splash, privacy policy; iOS simulator runtime for device
+- Store assets: privacy policy; iOS simulator runtime for device
   screenshots.

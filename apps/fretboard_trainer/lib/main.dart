@@ -3,15 +3,20 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'app/router.dart';
 import 'app/theme.dart';
+import 'features/splash/splash.dart';
 import 'services/settings.dart';
 
-void main() {
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  runApp(const ProviderScope(child: FretboardTrainerApp()));
+  final splash = launchRoute() == null ? await nextSighting() : null;
+  runApp(ProviderScope(child: FretboardTrainerApp(splash: splash)));
 }
 
 class FretboardTrainerApp extends ConsumerStatefulWidget {
-  const FretboardTrainerApp({super.key});
+  const FretboardTrainerApp({super.key, this.splash});
+
+  /// Cryptid splash shown over the first screen; null (tests) shows none.
+  final Sighting? splash;
 
   @override
   ConsumerState<FretboardTrainerApp> createState() =>
@@ -35,6 +40,10 @@ class _FretboardTrainerAppState extends ConsumerState<FretboardTrainerApp> {
         _ => ThemeMode.system,
       },
       routerConfig: _router,
+      builder: widget.splash == null
+          ? null
+          : (context, child) =>
+                SplashGate(sighting: widget.splash!, child: child!),
     );
   }
 }

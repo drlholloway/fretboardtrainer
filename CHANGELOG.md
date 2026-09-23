@@ -5,6 +5,12 @@ becomes the GitHub Release notes.
 
 ## Unreleased
 
+- Launch splash: a random cryptid plays you in each time the app opens:
+  Mothman on lead guitar, Bigfoot on bass, Nessie on her own neck, the
+  Jersey Devil on banjo, the Jackalope on ukulele and El Chupacabra on
+  acoustic. Tap to skip. The iOS and Android launch screens now use the
+  same night sky instead of white.
+
 ## 0.2.1 — 2026-09-11
 
 ### Added

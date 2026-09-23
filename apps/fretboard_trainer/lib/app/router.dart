@@ -14,19 +14,19 @@ import '../features/shell/app_shell.dart';
 
 /// Debug builds can be launched straight onto a screen, which is how the
 /// screenshots in `docs/` are taken (`FRETBOARD_ROUTE=/lesson/g6-string0-a`).
-String _initialLocation() {
-  if (!kDebugMode) return '/learn';
+String? launchRoute() {
+  if (!kDebugMode) return null;
   try {
-    return Platform.environment['FRETBOARD_ROUTE'] ?? '/learn';
+    return Platform.environment['FRETBOARD_ROUTE'];
   } catch (_) {
-    return '/learn';
+    return null;
   }
 }
 
 /// One router per app instance (a global would keep its location across
 /// widget tests).
 GoRouter createRouter() => GoRouter(
-  initialLocation: _initialLocation(),
+  initialLocation: launchRoute() ?? '/learn',
   routes: [
     ShellRoute(
       builder: (context, state, child) => AppShell(child: child),

@@ -12,6 +12,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:fretboard_theory/fretboard_theory.dart';
 import 'package:fretboard_trainer/app/theme.dart';
 import 'package:fretboard_trainer/features/learn/lesson_screen.dart';
+import 'package:fretboard_trainer/features/splash/splash.dart';
 import 'package:fretboard_trainer/main.dart';
 import 'package:fretboard_trainer/widgets/drill_runner.dart';
 import 'package:fretboard_trainer/widgets/question_view.dart';
@@ -278,5 +279,19 @@ void main() {
     );
     await tester.tap(find.text('Start'));
     await shot(tester, 'wiki-drill-bass');
+  }, skip: !enabled);
+
+  testWidgets('splash scenes', (tester) async {
+    await phone(tester);
+    for (final s in sightings) {
+      await tester.pumpWidget(
+        MaterialApp(
+          debugShowCheckedModeBanner: false,
+          theme: buildTheme(Brightness.dark),
+          home: SplashView(sighting: s),
+        ),
+      );
+      await shot(tester, 'splash-${s.asset}');
+    }
   }, skip: !enabled);
 }

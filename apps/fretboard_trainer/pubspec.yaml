@@ -27,6 +27,7 @@ flutter:
   uses-material-design: true
   assets:
     - assets/icon/icon_512.png
+    - assets/splash/
 
 # Masters are drawn by packaging/icon/make_icon.py; `just icons` regenerates
 # them and the per-platform icon sets.

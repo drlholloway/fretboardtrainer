@@ -55,3 +55,7 @@ screenshots:
 icons:
     uv run --with pillow packaging/icon/make_icon.py
     cd {{app}} && dart run flutter_launcher_icons
+
+# redraw the launch splash scenes (uv fetches Pillow)
+splash:
+    uv run --with pillow packaging/splash/make_splash.py

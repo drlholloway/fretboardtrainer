@@ -1,10 +1,13 @@
 import 'dart:async';
+import 'dart:io';
+import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fretboard_theory/fretboard_theory.dart';
 import 'package:fretboard_trainer/features/learn/lesson_screen.dart';
+import 'package:fretboard_trainer/features/splash/splash.dart';
 import 'package:fretboard_trainer/main.dart';
 import 'package:go_router/go_router.dart';
 import 'package:fretboard_trainer/widgets/drill_runner.dart';
@@ -229,5 +232,55 @@ void main() {
     await tester.pump();
     expect(find.byType(FretboardView), findsNWidgets(2));
     expect(find.byType(StaffView), findsNWidgets(2));
+  });
+
+  testWidgets('splash shows a sighting, fades on its own, and a tap skips it', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(1170, 2532);
+    tester.view.devicePixelRatio = 3;
+    addTearDown(tester.view.reset);
+    await tester.pumpWidget(
+      ProviderScope(child: FretboardTrainerApp(splash: sightings.first)),
+    );
+    await tester.pump();
+    expect(find.byType(SplashView), findsOneWidget);
+    expect(find.text('FRETMAN'), findsOneWidget);
+    await tester.pump(SplashGate.hold);
+    await tester.pumpAndSettle();
+    expect(find.byType(SplashView), findsNothing);
+    expect(find.text('The low E string'), findsOneWidget);
+
+    await tester.pumpWidget(const SizedBox());
+    await tester.pumpWidget(
+      MaterialApp(
+        home: SplashGate(sighting: sightings.last, child: const Text('behind')),
+      ),
+    );
+    expect(find.byType(SplashView), findsOneWidget);
+    await tester.tap(find.byType(SplashView));
+    await tester.pumpAndSettle();
+    expect(find.byType(SplashView), findsNothing);
+    expect(find.text('behind'), findsOneWidget);
+  });
+
+  test('every sighting has its picture', () {
+    for (final s in sightings) {
+      expect(
+        File('assets/splash/${s.asset}.png').existsSync(),
+        isTrue,
+        reason: s.asset,
+      );
+    }
+  });
+
+  test('the splash never repeats the previous launch', () async {
+    final random = Random(1);
+    var last = (await nextSighting(random)).asset;
+    for (var i = 0; i < 30; i++) {
+      final next = (await nextSighting(random)).asset;
+      expect(next, isNot(last));
+      last = next;
+    }
   });
 }
