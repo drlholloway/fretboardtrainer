@@ -32,7 +32,7 @@ docs/screenshots/            Rendered by `just screenshots`
 | 2 | Drill generation: four question types with sensible distractors | done |
 | 3 | Curriculum: per-string units, whole fretboard, open / power / barre chords, drop tuning | done |
 | 4 | App: learn path, lesson flow, free drill, settings, progress | done |
-| 5 | Polish: timing stats (done), spaced repetition (done), sound, more chord families | in progress |
+| 5 | Polish: timing stats (done), spaced repetition (done), sound (done), more chord families | in progress |
 | 6 | Store release: icon (done), splash (done), privacy policy (done), signing, store screenshots | in progress |
 
 ## 1. Theory package (`fretboard_theory`)
@@ -102,6 +102,21 @@ for never asked). Scope never changes, only the odds, and the lookup is live
 so a miss comes back within the run. `DrillRunner` passes it unless
 Settings → Practice weak spots more is off.
 
+### Sound
+
+`packaging/audio/make_samples.py` builds one MP3 per note from real
+recordings: the University of Iowa MIS classical guitar (Raimundo 118,
+recorded string by string, open to fret 18 or 19; no restrictions) and
+Karoryfer Growlybass (Squier Jazz, every third semitone, CC0; the others
+shifted a semitone). It splits the Iowa takes by pitch, checks every note's
+pitch, tunes them (the guitar was about 20 cents flat), trims, fades and
+loudness-matches, and pitch-shifts the edges (seven-string, drop tunings,
+top frets). `assets/audio/samples.json` lists what exists; `SampleMap`
+picks the recording from the string being played, and a test checks every
+position of every tuning preset has a file. `Sound` plays through
+flutter_soloud (MP3 only, `no_xiph_libs` so the build downloads nothing),
+caching 48 decoded samples; iOS uses the ambient session category.
+
 ## 3. Testing and tooling
 
 - `just test`: 58 theory tests (pitch spelling, tunings, chord naming, shape
@@ -136,7 +151,7 @@ handoff is seamless. Off in widget tests and when `FRETBOARD_ROUTE` is set.
 
 ## 5. Later
 
-- Audio: play the note or strum the chord on reveal; optional ear-training mode.
+- Ear training: hear a note or chord, find it (the samples are in place).
 - More chord families (C, G and D shape barres, triads, inversions) and
   bass-specific arpeggio drills.
 - Tab-style rendering option for questions (fret numbers on a tab staff).

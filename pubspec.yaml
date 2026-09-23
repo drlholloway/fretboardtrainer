@@ -6,3 +6,10 @@ environment:
 workspace:
   - packages/fretboard_theory
   - apps/fretboard_trainer
+
+# flutter_soloud: no Ogg/Opus/FLAC codecs (the samples are MP3, which the
+# engine decodes itself), so the build downloads no prebuilt libraries.
+hooks:
+  user_defines:
+    flutter_soloud:
+      no_xiph_libs: true

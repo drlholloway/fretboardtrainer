@@ -59,6 +59,14 @@ barre chords, and finally drop D (the lowest string retuned, plus one-finger
 power chords). Bass follows the same path without open and barre chords.
 Lessons unlock in order; a setting opens them all.
 
+### Sound
+
+After each answer the app plays the note, the octave shape or the chord
+strummed, from real recordings: a classical guitar recorded one string at a
+time by the [University of Iowa Electronic Music Studios](https://theremin.music.uiowa.edu/MISguitar.html)
+and a Jazz bass from [Karoryfer Samples](https://github.com/sfzinstruments/karoryfer.growlybass)
+(CC0). `packaging/audio/make_samples.py` builds them.
+
 ### Where you stand (Stats)
 
 Every answer in Learn and Drill is tallied on the device. The Stats tab shows

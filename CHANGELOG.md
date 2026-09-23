@@ -19,6 +19,12 @@ becomes the GitHub Release notes.
   seen in a while come up more often, in lessons and drills, and a miss
   brings that spot back sooner in the same run. On by default; Settings →
   Practice weak spots more turns it off.
+- Sound: after each answer you hear the note, the two notes of an octave
+  shape, or the chord strummed, from real recordings: a classical guitar
+  recorded string by string (University of Iowa Electronic Music Studios)
+  and a Jazz bass (Karoryfer Growlybass, CC0). A speaker button replays it
+  after a wrong answer. It mixes with other audio and follows the iPhone
+  silent switch; Settings → Sound turns it off.
 - Privacy policy (`PRIVACY.md`), linked from Settings → About: nothing is
   collected or sent; settings and progress stay on the device.
 

@@ -6,6 +6,7 @@ import 'package:fretboard_theory/fretboard_theory.dart';
 
 import '../app/theme.dart';
 import '../services/settings.dart';
+import '../services/sound.dart';
 import '../services/stats.dart';
 import 'question_view.dart';
 
@@ -94,6 +95,7 @@ class _DrillRunnerState extends ConsumerState<DrillRunner> {
         _misses.add(_q.explain(ref.read(accidentalsProvider)));
       }
     });
+    ref.read(soundProvider).answer(_q);
     ref
         .read(statsProvider.notifier)
         .record(
@@ -185,12 +187,24 @@ class _DrillRunnerState extends ConsumerState<DrillRunner> {
                 if (wrong)
                   Padding(
                     padding: const EdgeInsets.only(bottom: 10),
-                    child: Text(
-                      _q.explain(settings.accidentals),
-                      textAlign: TextAlign.center,
-                      style: theme.textTheme.bodyLarge?.copyWith(
-                        color: wrongColor,
-                      ),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            _q.explain(settings.accidentals),
+                            textAlign: TextAlign.center,
+                            style: theme.textTheme.bodyLarge?.copyWith(
+                              color: wrongColor,
+                            ),
+                          ),
+                        ),
+                        if (settings.soundOn)
+                          IconButton(
+                            tooltip: 'Hear it again',
+                            icon: const Icon(Icons.volume_up_outlined),
+                            onPressed: () => ref.read(soundProvider).answer(_q),
+                          ),
+                      ],
                     ),
                   ),
                 if (answered && !_q.isCorrect(_selected!))

@@ -10,3 +10,5 @@ key.properties
 *.jks
 *.keystore
 *.log
+packaging/audio/.cache/
+__pycache__/

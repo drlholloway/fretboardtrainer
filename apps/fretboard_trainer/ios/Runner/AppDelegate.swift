@@ -1,3 +1,4 @@
+import AVFoundation
 import Flutter
 import UIKit
 
@@ -7,6 +8,9 @@ import UIKit
     _ application: UIApplication,
     didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
   ) -> Bool {
+    // Notes mix with whatever else is playing (a backing track, a lesson
+    // video) and respect the silent switch.
+    try? AVAudioSession.sharedInstance().setCategory(.ambient)
     return super.application(application, didFinishLaunchingWithOptions: launchOptions)
   }
 

@@ -13,6 +13,7 @@ class Settings {
     this.themeMode = 'system',
     this.unlockAll = false,
     this.focusWeakSpots = true,
+    this.soundOn = true,
     this.drillModes = const {DrillMode.fretToNote, DrillMode.noteToFret},
     this.drillMaxFret = 12,
     this.drillNaturalsOnly = false,
@@ -41,6 +42,9 @@ class Settings {
 
   /// Spaced repetition: weight questions by the learner's stats.
   final bool focusWeakSpots;
+
+  /// Play the note or chord once a question is answered.
+  final bool soundOn;
 
   // Remembered free-drill options.
   final Set<DrillMode> drillModes;
@@ -78,6 +82,7 @@ class Settings {
     String? themeMode,
     bool? unlockAll,
     bool? focusWeakSpots,
+    bool? soundOn,
     Set<DrillMode>? drillModes,
     int? drillMaxFret,
     bool? drillNaturalsOnly,
@@ -94,6 +99,7 @@ class Settings {
     themeMode: themeMode ?? this.themeMode,
     unlockAll: unlockAll ?? this.unlockAll,
     focusWeakSpots: focusWeakSpots ?? this.focusWeakSpots,
+    soundOn: soundOn ?? this.soundOn,
     drillModes: drillModes ?? this.drillModes,
     drillMaxFret: drillMaxFret ?? this.drillMaxFret,
     drillNaturalsOnly: drillNaturalsOnly ?? this.drillNaturalsOnly,
@@ -126,6 +132,7 @@ class SettingsNotifier extends Notifier<Settings> {
       themeMode: p.getString('themeMode') ?? 'system',
       unlockAll: p.getBool('unlockAll') ?? false,
       focusWeakSpots: p.getBool('focusWeakSpots') ?? true,
+      soundOn: p.getBool('soundOn') ?? true,
       drillModes: {
         for (final m
             in p.getStringList('drillModes') ??
@@ -164,6 +171,7 @@ class SettingsNotifier extends Notifier<Settings> {
     await p.setString('themeMode', s.themeMode);
     await p.setBool('unlockAll', s.unlockAll);
     await p.setBool('focusWeakSpots', s.focusWeakSpots);
+    await p.setBool('soundOn', s.soundOn);
     await p.setStringList('drillModes', [for (final m in s.drillModes) m.name]);
     await p.setInt('drillMaxFret', s.drillMaxFret);
     await p.setBool('drillNaturalsOnly', s.drillNaturalsOnly);

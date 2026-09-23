@@ -16,6 +16,7 @@ dependencies:
   go_router: ^18.0.1
   shared_preferences: ^2.3.0
   url_launcher: ^6.3.0
+  flutter_soloud: ^5.1.2
 
 dev_dependencies:
   flutter_launcher_icons: ^0.14.0
@@ -28,6 +29,9 @@ flutter:
   assets:
     - assets/icon/icon_512.png
     - assets/splash/
+    - assets/audio/
+    - assets/audio/guitar/
+    - assets/audio/bass/
 
 # Masters are drawn by packaging/icon/make_icon.py; `just icons` regenerates
 # them and the per-platform icon sets.

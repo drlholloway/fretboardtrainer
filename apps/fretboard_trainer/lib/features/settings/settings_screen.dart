@@ -137,6 +137,15 @@ class SettingsScreen extends ConsumerWidget {
             ),
             section('Practice'),
             SwitchListTile(
+              value: s.soundOn,
+              title: const Text('Sound'),
+              subtitle: const Text(
+                'Hear the note or chord after each answer, played on a real '
+                'guitar or bass',
+              ),
+              onChanged: (v) => n.edit((s) => s.copyWith(soundOn: v)),
+            ),
+            SwitchListTile(
               value: s.focusWeakSpots,
               title: const Text('Practice weak spots more'),
               subtitle: const Text(
@@ -235,6 +244,15 @@ class SettingsScreen extends ConsumerWidget {
               onTap: () => launchUrl(
                 Uri.parse(tipUrl),
                 mode: LaunchMode.externalApplication,
+              ),
+            ),
+            const ListTile(
+              leading: Icon(Icons.music_note_outlined),
+              title: Text('Sounds'),
+              subtitle: Text(
+                'Guitar: University of Iowa Electronic Music Studios, a '
+                'Raimundo 118 classical guitar. Bass: Karoryfer Samples '
+                'Growlybass, a Squier Jazz Bass.',
               ),
             ),
             ListTile(
