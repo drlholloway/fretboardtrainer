@@ -125,17 +125,17 @@ void main() {
   group('octave unit', () {
     test('sits after the two lowest strings on guitar', () {
       final c = Curriculum(InstrumentKind.guitar, 6);
-      expect(c.units[2].title, 'Octave shapes');
-      expect(c.units[2].lessons.map((l) => l.title), [
+      expect(c.unitsIn(Track.fretboard)[2].title, 'Octave shapes');
+      expect(c.unitsIn(Track.fretboard)[2].lessons.map((l) => l.title), [
         'Two strings up, 2 frets higher',
         'Two strings up, 3 frets higher',
         'The long reaches',
         'Octave shapes test',
       ]);
-      expect(c.units[2].lessons[0].subtitle,
+      expect(c.unitsIn(Track.fretboard)[2].lessons[0].subtitle,
           'low E string → D string · A string → G string');
-      expect(c.units[3].title, 'The D string');
-      final cards = c.units[2].lessons[0].teach();
+      expect(c.unitsIn(Track.fretboard)[3].title, 'The D string');
+      final cards = c.unitsIn(Track.fretboard)[2].lessons[0].teach();
       expect(cards.length, 2);
       final card = cards.first as OctaveTeachCard;
       expect(card.title, 'Low E string → D string');
@@ -148,8 +148,8 @@ void main() {
 
     test('bass has no B-string lesson', () {
       final c = Curriculum(InstrumentKind.bass, 4);
-      expect(c.units[2].title, 'Octave shapes');
-      expect(c.units[2].lessons.map((l) => l.title), [
+      expect(c.unitsIn(Track.fretboard)[2].title, 'Octave shapes');
+      expect(c.unitsIn(Track.fretboard)[2].lessons.map((l) => l.title), [
         'Two strings up, 2 frets higher',
         'The long reaches',
         'Octave shapes test',

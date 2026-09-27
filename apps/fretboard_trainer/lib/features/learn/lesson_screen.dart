@@ -6,6 +6,8 @@ import 'package:go_router/go_router.dart';
 import '../../app/theme.dart';
 import '../../services/progress.dart';
 import '../../services/settings.dart';
+import '../../services/sound.dart';
+import '../../widgets/ear_notice.dart';
 import '../../widgets/drill_runner.dart';
 import '../../widgets/fretboard.dart';
 
@@ -108,8 +110,9 @@ class _LessonScreenState extends ConsumerState<LessonScreen> {
   }
 
   Lesson? _nextAfter(Curriculum c, Lesson l) {
-    final i = c.lessons.indexOf(l);
-    return i + 1 < c.lessons.length ? c.lessons[i + 1] : null;
+    final path = c.lessonsIn(c.trackOf(l));
+    final i = path.indexOf(l);
+    return i + 1 < path.length ? path[i + 1] : null;
   }
 }
 
@@ -310,6 +313,49 @@ class TeachCardView extends ConsumerWidget {
           Text(
             c.voicing.tab,
             style: theme.textTheme.bodyMedium?.copyWith(letterSpacing: 2),
+          ),
+        ],
+      ),
+      final EarTeachCard c => Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          const EarNotice(compact: true),
+          FretboardView(
+            instrument: instrument,
+            lastFret: 12,
+            leftHanded: settings.leftHanded,
+            dimStringsExcept: c.string,
+            markers: [
+              for (final e in c.examples) ...[
+                if (e.reference case final r?)
+                  FretMarker(
+                    r,
+                    label: instrument.pitchAt(r).pitchClass.name(acc),
+                    color: stringColor,
+                  ),
+                FretMarker(
+                  e.target,
+                  label: instrument.pitchAt(e.target).pitchClass.name(acc),
+                ),
+              ],
+            ],
+          ),
+          const SizedBox(height: 12),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            alignment: WrapAlignment.center,
+            children: [
+              for (final e in c.examples)
+                ActionChip(
+                  avatar: const Icon(Icons.play_arrow, size: 18),
+                  label: Text(e.label),
+                  onPressed: () => ref.read(soundProvider).play(instrument, [
+                    ?e.reference,
+                    e.target,
+                  ], gap: Sound.phraseGap),
+                ),
+            ],
           ),
         ],
       ),

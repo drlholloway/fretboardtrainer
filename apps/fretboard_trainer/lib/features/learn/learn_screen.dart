@@ -5,8 +5,10 @@ import 'package:go_router/go_router.dart';
 
 import '../../services/progress.dart';
 import '../../services/settings.dart';
+import '../../widgets/ear_notice.dart';
 
-/// The Duolingo-style path: units of lessons, unlocked in order.
+/// The Duolingo-style paths, fretboard and ear: units of lessons, unlocked
+/// in order along each path.
 class LearnScreen extends ConsumerWidget {
   const LearnScreen({super.key});
 
@@ -15,9 +17,11 @@ class LearnScreen extends ConsumerWidget {
     final settings = ref.watch(settingsProvider);
     final curriculum = ref.watch(curriculumProvider);
     final progress = ref.watch(progressProvider);
-    final next = ref.watch(nextLessonProvider);
+    final track = settings.learnTrack;
+    final next = ref.watch(nextLessonProvider(track));
     final theme = Theme.of(context);
-    final done = curriculum.lessons
+    final lessons = curriculum.lessonsIn(track);
+    final done = lessons
         .where((l) => progress[l.id]?.completed ?? false)
         .length;
 
@@ -30,13 +34,37 @@ class LearnScreen extends ConsumerWidget {
               padding: const EdgeInsets.only(right: 16),
               child: Center(
                 child: Text(
-                  '$done / ${curriculum.lessons.length}',
+                  '$done / ${lessons.length}',
                   style: theme.textTheme.labelLarge,
                 ),
               ),
             ),
           ],
         ),
+        SliverToBoxAdapter(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+            child: SegmentedButton<Track>(
+              segments: const [
+                ButtonSegment(
+                  value: Track.fretboard,
+                  icon: Icon(Icons.grid_on),
+                  label: Text('Fretboard'),
+                ),
+                ButtonSegment(
+                  value: Track.ear,
+                  icon: Icon(Icons.hearing),
+                  label: Text('Ear'),
+                ),
+              ],
+              selected: {track},
+              onSelectionChanged: (v) => ref
+                  .read(settingsProvider.notifier)
+                  .edit((s) => s.copyWith(learnTrack: v.first)),
+            ),
+          ),
+        ),
+        if (track == Track.ear) const SliverToBoxAdapter(child: EarNotice()),
         SliverToBoxAdapter(
           child: Padding(
             padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
@@ -64,7 +92,8 @@ class LearnScreen extends ConsumerWidget {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                '${settings.kind.label}, ${settings.stringCount} strings',
+                                '${settings.kind.label}, ${settings.stringCount} strings'
+                                '${track == Track.ear ? ' · ear training' : ''}',
                                 style: theme.textTheme.titleMedium,
                               ),
                               const SizedBox(height: 4),
@@ -95,7 +124,7 @@ class LearnScreen extends ConsumerWidget {
             ),
           ),
         ),
-        for (final unit in curriculum.units)
+        for (final unit in curriculum.unitsIn(track))
           SliverToBoxAdapter(
             child: _UnitCard(
               unit: unit,

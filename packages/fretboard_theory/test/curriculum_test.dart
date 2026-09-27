@@ -5,7 +5,7 @@ void main() {
   group('Curriculum', () {
     test('guitar path follows the README order', () {
       final c = Curriculum(InstrumentKind.guitar, 6);
-      expect(c.units.map((u) => u.title), [
+      expect(c.unitsIn(Track.fretboard).map((u) => u.title), [
         'The low E string',
         'The A string',
         'Octave shapes',
@@ -23,7 +23,7 @@ void main() {
 
     test('bass path skips open and barre chords', () {
       final c = Curriculum(InstrumentKind.bass, 4);
-      expect(c.units.map((u) => u.title), [
+      expect(c.unitsIn(Track.fretboard).map((u) => u.title), [
         'The E string',
         'The A string',
         'Octave shapes',
@@ -37,14 +37,22 @@ void main() {
 
     test('five-string bass has no drop unit', () {
       final c = Curriculum(InstrumentKind.bass, 5);
-      expect(c.units.last.title, 'Power chords');
-      expect(c.units.first.title, 'The B string');
+      expect(c.unitsIn(Track.fretboard).last.title, 'Power chords');
+      expect(c.unitsIn(Track.fretboard).first.title, 'The B string');
     });
 
     test('seven-string guitar ends in drop A', () {
       final c = Curriculum(InstrumentKind.guitar, 7);
-      expect(c.units.last.title, 'Drop A');
-      expect(c.units.last.lessons.first.instrument.tuning.describe(),
+      expect(c.unitsIn(Track.fretboard).last.title, 'Drop A');
+      expect(
+          c
+              .unitsIn(Track.fretboard)
+              .last
+              .lessons
+              .first
+              .instrument
+              .tuning
+              .describe(),
           'A E A D G B E');
     });
 
@@ -105,7 +113,7 @@ void main() {
 
     test('drop unit lessons use the drop tuning', () {
       final c = Curriculum(InstrumentKind.guitar, 6);
-      final drop = c.units.last;
+      final drop = c.unitsIn(Track.fretboard).last;
       for (final l in drop.lessons) {
         expect(l.instrument.tuning.id, 'dropd6');
       }

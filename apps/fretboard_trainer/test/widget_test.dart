@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:math';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -392,5 +393,75 @@ void main() {
     expect(tester.widget<SwitchListTile>(tile).value, isFalse);
     final prefs = await SharedPreferences.getInstance();
     expect(prefs.getBool('focusWeakSpots'), isFalse);
+  });
+
+  testWidgets('the ear path: its own units, a full lesson, the reminders', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(1170, 2532);
+    tester.view.devicePixelRatio = 3;
+    addTearDown(tester.view.reset);
+    await tester.pumpWidget(const ProviderScope(child: FretboardTrainerApp()));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Ear'));
+    await tester.pumpAndSettle();
+    expect(find.text('The open strings'), findsOneWidget);
+    expect(find.text('The low E string'), findsNothing);
+    expect(find.textContaining('Next: The open strings'), findsOneWidget);
+    // Not an iPhone, sound on: nothing to warn about.
+    expect(find.textContaining('silent'), findsNothing);
+    expect(find.text('Turn on sound'), findsNothing);
+
+    await tester.tap(find.text('Continue'));
+    await tester.pumpAndSettle();
+    expect(find.text('The open strings'), findsWidgets);
+    expect(find.byType(ActionChip), findsNWidgets(3));
+    await tester.tap(find.text('Start questions'));
+    await tester.pumpAndSettle();
+    expect(find.text('Which open string was that?'), findsOneWidget);
+    expect(find.byKey(const ValueKey('listen')), findsOneWidget);
+
+    for (var i = 0; i < 8; i++) {
+      await tester.tap(find.byKey(const ValueKey('choice0')));
+      await tester.pump();
+      final cont = find.text('Continue');
+      if (cont.evaluate().isNotEmpty) {
+        expect(find.textContaining('That was the open'), findsOneWidget);
+        await tester.tap(cont);
+      } else {
+        await tester.pump(const Duration(milliseconds: 700));
+      }
+      await tester.pumpAndSettle();
+    }
+    expect(find.textContaining('of 8 correct'), findsOneWidget);
+
+    // The path choice is remembered.
+    final prefs = await SharedPreferences.getInstance();
+    expect(prefs.getString('learnTrack'), 'ear');
+  });
+
+  testWidgets('ear reminders: sound off anywhere, silent switch on iOS', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(1170, 2532);
+    tester.view.devicePixelRatio = 3;
+    addTearDown(tester.view.reset);
+    SharedPreferences.setMockInitialValues({
+      'learnTrack': 'ear',
+      'soundOn': false,
+    });
+    await tester.pumpWidget(const ProviderScope(child: FretboardTrainerApp()));
+    await tester.pumpAndSettle();
+    expect(find.textContaining('needs sound'), findsOneWidget);
+    await tester.tap(find.text('Turn on sound'));
+    await tester.pumpAndSettle();
+    expect(find.textContaining('needs sound'), findsNothing);
+
+    debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
+    await tester.pumpWidget(const SizedBox());
+    await tester.pumpWidget(const ProviderScope(child: FretboardTrainerApp()));
+    await tester.pumpAndSettle();
+    expect(find.textContaining('may be on silent'), findsOneWidget);
+    debugDefaultTargetPlatformOverride = null;
   });
 }

@@ -117,6 +117,24 @@ position of every tuning preset has a file. `Sound` plays through
 flutter_soloud (MP3 only, `no_xiph_libs` so the build downloads nothing),
 caching 48 decoded samples; iOS uses the ambient session category.
 
+### Ear training
+
+A second path (`Track.ear`) beside the fretboard one: `Curriculum.unitsIn`
+/ `lessonsIn` / `trackOf` keep them apart, lessons unlock along their own
+path, and Learn switches between them (remembered in settings). Answers go
+on the fretboard. `EarStringQuestion`: one open string; pick which among
+the lesson's strings (lowest first). `EarNoteQuestion`: the open string,
+then a note on it, the open string itself included; pick the fret among
+four on that string. `EarIntervalQuestion`: a shown
+root, then a note up the same string; pick it (tiles say how many frets
+up). Both play their prompt when shown, have Play again, and replay after
+the answer; stats key on the position and on the interval size. Teach cards
+(`EarTeachCard`) have a chip per example that plays it. `EarNotice` asks
+for sound when it is off and, on iOS (which cannot read the switch),
+reminds about the silent switch. Lesson ids are `<p>-ear-open-*`,
+`<p>-ear-find-*` and `<p>-ear-intervals-*`. Still to come: thirds and the other intervals,
+cross-string shapes, chord quality, interval stats.
+
 ## 3. Testing and tooling
 
 - `just test`: 58 theory tests (pitch spelling, tunings, chord naming, shape
@@ -151,7 +169,9 @@ handoff is seamless. Off in widget tests and when `FRETBOARD_ROUTE` is set.
 
 ## 5. Later
 
-- Ear training: hear a note or chord, find it (the samples are in place).
+- Ear training, steps 2 and 3: thirds, then the remaining intervals and the
+  cross-string shapes; chord quality (major, minor, power, 7th) and a mixed
+  test; a per-interval section in Stats.
 - More chord families (C, G and D shape barres, triads, inversions) and
   bass-specific arpeggio drills.
 - Tab-style rendering option for questions (fret numbers on a tab staff).

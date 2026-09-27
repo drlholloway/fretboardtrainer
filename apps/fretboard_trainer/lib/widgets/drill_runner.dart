@@ -8,6 +8,7 @@ import '../app/theme.dart';
 import '../services/settings.dart';
 import '../services/sound.dart';
 import '../services/stats.dart';
+import 'ear_notice.dart';
 import 'question_view.dart';
 
 class DrillResult {
@@ -72,7 +73,11 @@ class _DrillRunnerState extends ConsumerState<DrillRunner> {
     );
     _q = _gen.next();
     _clock.start();
+    _listen();
   }
+
+  /// Ear questions are asked out loud.
+  void _listen() => ref.read(soundProvider).prompt(_q);
 
   @override
   void dispose() {
@@ -120,6 +125,7 @@ class _DrillRunnerState extends ConsumerState<DrillRunner> {
       _q = _gen.next();
     });
     _clock.reset();
+    _listen();
   }
 
   void _finish() => widget.onFinished(
@@ -164,6 +170,8 @@ class _DrillRunnerState extends ConsumerState<DrillRunner> {
             ],
           ),
         ),
+        if (widget.config.modes.any((m) => m.isEar))
+          const EarNotice(compact: true),
         Expanded(
           child: SingleChildScrollView(
             padding: const EdgeInsets.all(16),
@@ -174,6 +182,7 @@ class _DrillRunnerState extends ConsumerState<DrillRunner> {
               onSelect: _select,
               accidentals: settings.accidentals,
               leftHanded: settings.leftHanded,
+              onListen: _listen,
             ),
           ),
         ),

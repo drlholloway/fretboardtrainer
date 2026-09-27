@@ -172,7 +172,8 @@ void main() {
 
     // A learner two thirds of the way through the guitar path.
     final c = Curriculum(InstrumentKind.guitar, 6);
-    final done = c.lessons
+    final done = c
+        .lessonsIn(Track.fretboard)
         .takeWhile((l) => !l.unitId.endsWith('-open'))
         .toList();
     SharedPreferences.setMockInitialValues({
@@ -337,5 +338,52 @@ void main() {
     await shot(tester, 'stats');
     await tester.tap(find.text('How fast'));
     await shot(tester, 'wiki-stats-speed');
+  }, skip: !enabled);
+
+  testWidgets('ear path', (tester) async {
+    await phone(tester);
+    SharedPreferences.setMockInitialValues({'learnTrack': 'ear'});
+    await tester.pumpWidget(const ProviderScope(child: FretboardTrainerApp()));
+    await shot(tester, 'ear-learn');
+    await tester.tap(find.text('Continue'));
+    await shot(tester, 'ear-teach');
+    await tester.tap(find.text('Start questions'));
+    await shot(tester, 'ear-question');
+    await tester.tap(find.byKey(const ValueKey('choice0')));
+    await tester.pump();
+    await shot(tester, 'ear-answered');
+
+    Future<void> open(String title) async {
+      await tester.pumpWidget(const SizedBox());
+      SharedPreferences.setMockInitialValues({
+        'learnTrack': 'ear',
+        'unlockAll': true,
+      });
+      await tester.pumpWidget(
+        const ProviderScope(child: FretboardTrainerApp()),
+      );
+      await tester.pumpAndSettle();
+      await tester.scrollUntilVisible(
+        find.text(title),
+        300,
+        scrollable: find.byType(Scrollable).first,
+      );
+      await Scrollable.ensureVisible(
+        tester.element(find.text(title)),
+        alignment: 0.5,
+      );
+      await tester.pumpAndSettle();
+      await tester.tap(find.text(title));
+      await tester.pumpAndSettle();
+    }
+
+    await open('The low E string, frets 0–5');
+    await shot(tester, 'ear-find-teach');
+    await tester.tap(find.text('Start questions'));
+    await shot(tester, 'ear-find');
+
+    await open('Add the fourth');
+    await tester.tap(find.text('Skip'));
+    await shot(tester, 'ear-interval');
   }, skip: !enabled);
 }

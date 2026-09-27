@@ -13,6 +13,8 @@ extension StatKeys on Question {
         FretToNoteQuestion(:final position) => position,
         NoteToFretQuestion(:final answer) => answer,
         OctaveQuestion(:final answer) => answer,
+        EarNoteQuestion(:final position) => position,
+        EarStringQuestion(:final position) => position,
         _ => null,
       };
 
@@ -24,11 +26,18 @@ extension StatKeys on Question {
       };
 
   String get statKey {
+    if (this case EarIntervalQuestion(:final semitones)) {
+      return intervalStatKey(semitones);
+    }
     final p = statPosition;
     if (p != null) return positionStatKey(mode, p);
     return voicingStatKey(mode, statVoicing!);
   }
 }
+
+/// Intervals are tallied by size, wherever on the neck they were played.
+String intervalStatKey(int semitones) =>
+    '${DrillMode.earInterval.name}:$semitones';
 
 String positionStatKey(DrillMode mode, FretPosition p) =>
     '${mode.name}:${p.string}:${p.fret}';

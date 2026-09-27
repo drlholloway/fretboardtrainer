@@ -89,8 +89,9 @@ final progressProvider =
       ProgressNotifier.new,
     );
 
-/// Lessons unlock in order: a lesson is open once the one before it is
-/// complete, unless the learner has turned on "unlock everything".
+/// Lessons unlock in order along their own path (fretboard or ear): a
+/// lesson is open once the one before it is complete, unless the learner
+/// has turned on "unlock everything".
 bool isLessonUnlocked(
   Curriculum c,
   Map<String, LessonProgress> progress,
@@ -98,21 +99,25 @@ bool isLessonUnlocked(
   bool unlockAll = false,
 }) {
   if (unlockAll) return true;
-  final all = c.lessons;
+  final all = c.lessonsIn(c.trackOf(lesson));
   final i = all.indexOf(lesson);
   if (i <= 0) return true;
   return progress[all[i - 1].id]?.completed ?? false;
 }
 
-/// The first lesson that is unlocked but not yet complete.
-Lesson? nextLesson(Curriculum c, Map<String, LessonProgress> progress) {
-  for (final l in c.lessons) {
+/// The first lesson on [track] that is not yet complete.
+Lesson? nextLesson(
+  Curriculum c,
+  Map<String, LessonProgress> progress, [
+  Track track = Track.fretboard,
+]) {
+  for (final l in c.lessonsIn(track)) {
     if (!(progress[l.id]?.completed ?? false)) return l;
   }
   return null;
 }
 
-final nextLessonProvider = Provider<Lesson?>((ref) {
+final nextLessonProvider = Provider.family<Lesson?, Track>((ref, track) {
   final c = ref.watch(curriculumProvider);
-  return nextLesson(c, ref.watch(progressProvider));
+  return nextLesson(c, ref.watch(progressProvider), track);
 });

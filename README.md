@@ -59,6 +59,15 @@ barre chords, and finally drop D (the lowest string retuned, plus one-finger
 power chords). Bass follows the same path without open and barre chords.
 Lessons unlock in order; a setting opens them all.
 
+### Ear training (Learn → Ear)
+
+A second path on the Learn tab. You hear notes and find them on the
+fretboard: first which open string is playing, then the open string and a
+note on it (the open string again counts), then intervals (octave, fifth,
+fourth) up one string. Lessons start with examples you tap to hear,
+and every question can be played again. On iPhone, make sure the silent
+switch is off.
+
 ### Sound
 
 After each answer the app plays the note, the octave shape or the chord

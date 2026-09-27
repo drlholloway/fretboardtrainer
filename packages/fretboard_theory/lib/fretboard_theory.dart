@@ -8,6 +8,7 @@ export 'src/chords.dart';
 export 'src/curriculum.dart';
 export 'src/drills.dart';
 export 'src/instrument.dart';
+export 'src/intervals.dart';
 export 'src/octaves.dart';
 export 'src/pitch.dart';
 export 'src/stats.dart';

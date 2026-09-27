@@ -126,8 +126,25 @@ class Sound {
     _playing.clear();
   }
 
+  /// The sound an ear question asks about: the reference note, then the
+  /// one to find. Nothing for the other questions, which are seen.
+  Future<void> prompt(Question q) => switch (q) {
+    EarStringQuestion(:final instrument, :final position) => play(instrument, [
+      position,
+    ]),
+    EarNoteQuestion(:final instrument, :final reference, :final position) =>
+      play(instrument, [reference, position], gap: phraseGap),
+    EarIntervalQuestion(:final instrument, :final root, :final answer) => play(
+      instrument,
+      [root, answer],
+      gap: phraseGap,
+    ),
+    _ => Future.value(),
+  };
+
   /// What a question sounds like once it is answered: the note, the two
-  /// notes of an octave shape, or the chord strummed.
+  /// notes of an octave shape, the chord strummed, or the ear question's
+  /// two notes again.
   Future<void> answer(Question q) => switch (q) {
     FretToNoteQuestion(:final instrument, :final position) => play(instrument, [
       position,
@@ -142,6 +159,9 @@ class Sound {
     ),
     ChordToNameQuestion(:final voicing) => strum(voicing),
     NameToChordQuestion(:final answer) => strum(answer),
+    EarStringQuestion() ||
+    EarNoteQuestion() ||
+    EarIntervalQuestion() => prompt(q),
   };
 
   Future<void> strum(ChordVoicing v) => play(

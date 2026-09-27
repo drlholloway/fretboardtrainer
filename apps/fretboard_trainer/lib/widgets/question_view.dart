@@ -16,6 +16,7 @@ class QuestionView extends StatelessWidget {
     required this.onSelect,
     required this.accidentals,
     this.leftHanded = false,
+    this.onListen,
   });
 
   final Question question;
@@ -23,6 +24,9 @@ class QuestionView extends StatelessWidget {
   final ValueChanged<int> onSelect;
   final Accidentals accidentals;
   final bool leftHanded;
+
+  /// Replays an ear question's sound.
+  final VoidCallback? onListen;
 
   static const _letters = ['A', 'B', 'C', 'D', 'E', 'F'];
 
@@ -33,6 +37,9 @@ class QuestionView extends StatelessWidget {
     final OctaveQuestion q => _octave(context, q),
     final ChordToNameQuestion q => _chordToName(context, q),
     final NameToChordQuestion q => _nameToChord(context, q),
+    final EarStringQuestion q => _earString(context, q),
+    final EarNoteQuestion q => _earNote(context, q),
+    final EarIntervalQuestion q => _earInterval(context, q),
   };
 
   Color? _border(int i) {
@@ -260,6 +267,165 @@ class QuestionView extends StatelessWidget {
               ),
             ),
         ], aspect: 3.2),
+      ],
+    );
+  }
+
+  Widget _listen(BuildContext context) => Padding(
+    padding: const EdgeInsets.only(bottom: 12),
+    child: Center(
+      child: FilledButton.tonalIcon(
+        key: const ValueKey('listen'),
+        onPressed: onListen,
+        icon: const Icon(Icons.hearing),
+        label: const Text('Play again'),
+      ),
+    ),
+  );
+
+  /// Lettered markers for fret choices along one string; once answered the
+  /// right one turns green and a wrong pick red, and every marker shows its
+  /// note.
+  List<FretMarker> _fretChoices(Instrument i, List<FretPosition> choices) => [
+    for (final (n, p) in choices.indexed)
+      FretMarker(
+        p,
+        label: selected == null
+            ? _letters[n]
+            : i.pitchAt(p).pitchClass.name(accidentals),
+        color: switch (_border(n)) {
+          null => markerColor,
+          final c => c,
+        },
+        textColor: _border(n) == null ? markerText : Colors.white,
+      ),
+  ];
+
+  Widget _fretTiles(
+    BuildContext context,
+    List<FretPosition> choices, {
+    FretPosition? from,
+  }) => _grid([
+    for (final (n, p) in choices.indexed)
+      _choice(
+        context,
+        n,
+        Center(
+          child: Text(
+            '${_letters[n]}  ·  ${p.isOpen ? 'open' : 'fret ${p.fret}'}'
+            '${from == null ? '' : '  (${p.fret - from.fret} up)'}',
+            textAlign: TextAlign.center,
+            style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
+          ),
+        ),
+      ),
+  ], aspect: 3.2);
+
+  Widget _earString(BuildContext context, EarStringQuestion q) {
+    final i = q.instrument;
+    String label(int s) {
+      final l = i.stringLabel(s, accidentals);
+      return '${l[0].toUpperCase()}${l.substring(1)}';
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        _prompt(context, 'Which open string was that?'),
+        _listen(context),
+        FretboardView(
+          instrument: i,
+          lastFret: 5,
+          leftHanded: leftHanded,
+          markers: _fretChoices(i, [
+            for (final s in q.choices) FretPosition(s, 0),
+          ]),
+        ),
+        const SizedBox(height: 12),
+        _grid([
+          for (final (n, s) in q.choices.indexed)
+            _choice(
+              context,
+              n,
+              Center(
+                child: Text(
+                  '${_letters[n]}  ·  ${label(s)} string',
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            ),
+        ], aspect: 3.2),
+      ],
+    );
+  }
+
+  Widget _earNote(BuildContext context, EarNoteQuestion q) {
+    final i = q.instrument;
+    final s = i.stringLabel(q.position.string, accidentals);
+    final open = i.openPitch(q.position.string).pitchClass.name(accidentals);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        _prompt(context, 'Which fret was that?'),
+        _listen(context),
+        FretboardView(
+          instrument: i,
+          lastFret: 12,
+          leftHanded: leftHanded,
+          dimStringsExcept: q.position.string,
+          markers: [
+            // The open string is a choice itself when it is one of them.
+            if (!q.choices.contains(q.reference))
+              FretMarker(q.reference, label: open, color: stringColor),
+            ..._fretChoices(i, q.choices),
+          ],
+        ),
+        Padding(
+          padding: const EdgeInsets.symmetric(vertical: 8),
+          child: Text(
+            'First the open $s string, then a note on it.',
+            textAlign: TextAlign.center,
+            style: Theme.of(context).textTheme.bodyMedium,
+          ),
+        ),
+        _fretTiles(context, q.choices),
+      ],
+    );
+  }
+
+  Widget _earInterval(BuildContext context, EarIntervalQuestion q) {
+    final i = q.instrument;
+    final s = i.stringLabel(q.root.string, accidentals);
+    final root = i.pitchAt(q.root).pitchClass.name(accidentals);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        _prompt(context, 'Where was the second note?'),
+        _listen(context),
+        FretboardView(
+          instrument: i,
+          lastFret: 12,
+          leftHanded: leftHanded,
+          dimStringsExcept: q.root.string,
+          markers: [
+            FretMarker(q.root, label: root, color: stringColor),
+            ..._fretChoices(i, q.choices),
+          ],
+        ),
+        Padding(
+          padding: const EdgeInsets.symmetric(vertical: 8),
+          child: Text(
+            'First $root on the $s string, then a note higher on the same '
+            'string.',
+            textAlign: TextAlign.center,
+            style: Theme.of(context).textTheme.bodyMedium,
+          ),
+        ),
+        _fretTiles(context, q.choices, from: q.root),
       ],
     );
   }

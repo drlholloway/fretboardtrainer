@@ -3,6 +3,7 @@ import 'package:meta/meta.dart';
 import 'chords.dart';
 import 'drills.dart';
 import 'instrument.dart';
+import 'intervals.dart';
 import 'octaves.dart';
 import 'pitch.dart';
 
@@ -67,6 +68,39 @@ class ChordTeachCard extends TeachCard {
   final ChordVoicing voicing;
 }
 
+/// One sound to play on an [EarTeachCard]: the reference (if any), then
+/// the target.
+@immutable
+class EarExample {
+  const EarExample({this.reference, required this.target, required this.label});
+  final FretPosition? reference;
+  final FretPosition target;
+  final String label;
+}
+
+/// Shows positions on the fretboard with buttons that play them.
+class EarTeachCard extends TeachCard {
+  const EarTeachCard({
+    required super.title,
+    required super.body,
+    required this.examples,
+    this.string,
+  });
+  final List<EarExample> examples;
+
+  /// Dim the other strings.
+  final int? string;
+}
+
+/// The two learning paths.
+enum Track {
+  fretboard('Fretboard'),
+  ear('Ear');
+
+  const Track(this.label);
+  final String label;
+}
+
 /// A lesson: some teaching, then a run of questions with a pass mark.
 @immutable
 class Lesson {
@@ -89,6 +123,7 @@ class Lesson {
     this.rootStrings,
     this.maxRootFret = 12,
     this.octaveShapes,
+    this.intervals,
   });
 
   final String id;
@@ -115,9 +150,14 @@ class Lesson {
   final int maxRootFret;
   final List<OctaveShape>? octaveShapes;
 
-  bool get hasNotes => modes.any((m) => !m.isChord && m != DrillMode.octave);
+  /// Interval lessons: which intervals, in semitones.
+  final Set<int>? intervals;
+
+  bool get hasNotes =>
+      modes.any((m) => !m.isChord && !m.isEar && m != DrillMode.octave);
   bool get hasOctaves => modes.contains(DrillMode.octave);
   bool get hasChords => modes.any((m) => m.isChord);
+  bool get isEar => modes.any((m) => m.isEar);
 
   DrillConfig get config => DrillConfig(
         instrument: instrument,
@@ -131,6 +171,7 @@ class Lesson {
         rootStrings: rootStrings,
         maxRootFret: maxRootFret,
         octaveShapes: octaveShapes,
+        intervals: intervals,
       );
 
   /// Teaching cards, generated from the lesson spec.
@@ -159,6 +200,20 @@ class Lesson {
         for (final s in ss) {
           cards.add(_stringCard(s, acc));
         }
+      }
+    }
+    if (modes.contains(DrillMode.earString)) {
+      cards.add(_openStringsCard(acc));
+    }
+    if (modes.contains(DrillMode.earNote)) {
+      for (final s in config.stringList) {
+        cards.add(_earNoteCard(s, acc));
+      }
+    }
+    if (modes.contains(DrillMode.earInterval)) {
+      for (final iv in (intervals ?? {for (var i = 1; i <= 12; i++) i}).toList()
+        ..sort()) {
+        cards.add(_intervalCard(iv, acc));
       }
     }
     if (hasOctaves) {
@@ -218,6 +273,74 @@ class Lesson {
       minFret: minFret,
       maxFret: maxFret,
       naturalsOnly: naturalsOnly,
+    );
+  }
+
+  EarTeachCard _openStringsCard(Accidentals acc) {
+    final ss = config.stringList;
+    String label(int s) {
+      final l = instrument.stringLabel(s, acc);
+      return '${l[0].toUpperCase()}${l.substring(1)}';
+    }
+
+    return EarTeachCard(
+      title: 'The open strings',
+      body: 'Each question plays one open string. Listen for how low or '
+          'high it sits: the ${instrument.stringLabel(ss.first, acc)} string '
+          'is the deepest here and the ${instrument.stringLabel(ss.last, acc)} '
+          'string the highest. Tap a string to hear it; try them in order, '
+          'lowest to highest, a few times.',
+      examples: [
+        for (final s in ss)
+          EarExample(target: FretPosition(s, 0), label: label(s)),
+      ],
+    );
+  }
+
+  EarTeachCard _earNoteCard(int s, Accidentals acc) {
+    final label = instrument.stringLabel(s, acc);
+    final open = instrument.openPitch(s).pitchClass.name(acc);
+    String note(int f) =>
+        instrument.pitchAt(FretPosition(s, f)).pitchClass.name(acc);
+    return EarTeachCard(
+      title: 'Hearing the $label string',
+      body: 'Each question plays the open $open first, then a note on the '
+          'same string, sometimes the open $open again. The higher the fret, '
+          'the bigger the jump from the open string: listen to the gap, not '
+          'just the note. Tap a fret to hear it after the open string.',
+      string: s,
+      examples: [
+        for (var f = minFret; f <= maxFret && f <= 12; f++)
+          EarExample(
+            reference: FretPosition(s, 0),
+            target: FretPosition(s, f),
+            label: f == 0 ? 'Open · ${note(f)}' : 'Fret $f · ${note(f)}',
+          ),
+      ],
+    );
+  }
+
+  EarTeachCard _intervalCard(int iv, Accidentals acc) {
+    final s = config.stringList.first;
+    final label = instrument.stringLabel(s, acc);
+    final roots = [0, 2, 5].where((r) => r + iv <= 12).toList();
+    String note(int f) =>
+        instrument.pitchAt(FretPosition(s, f)).pitchClass.name(acc);
+    final name = Intervals.name(iv);
+    return EarTeachCard(
+      title: '${name[0].toUpperCase()}${name.substring(1)}',
+      body: 'A $name is ${iv == 1 ? 'one fret' : '$iv frets'} up one string, '
+          'from any starting note. It sounds ${Intervals.sound(iv)}. '
+          'Tap an example to hear it on the $label string.',
+      string: s,
+      examples: [
+        for (final r in roots)
+          EarExample(
+            reference: FretPosition(s, r),
+            target: FretPosition(s, r + iv),
+            label: '${note(r)} → ${note(r + iv)}',
+          ),
+      ],
     );
   }
 
@@ -292,8 +415,10 @@ class Unit {
     required this.title,
     required this.description,
     required this.lessons,
+    this.track = Track.fretboard,
   });
   final String id;
+  final Track track;
   final String title;
   final String description;
   final List<Lesson> lessons;
@@ -308,7 +433,17 @@ class Curriculum {
   final int stringCount;
   final List<Unit> units;
 
+  /// Every lesson on both paths; [lessonsIn] for one path in order.
   List<Lesson> get lessons => [for (final u in units) ...u.lessons];
+
+  List<Unit> unitsIn(Track t) => [
+        for (final u in units)
+          if (u.track == t) u,
+      ];
+
+  List<Lesson> lessonsIn(Track t) => [for (final u in unitsIn(t)) ...u.lessons];
+
+  Track trackOf(Lesson l) => unitOf(l).track;
 
   Lesson? lessonById(String id) {
     for (final l in lessons) {
@@ -678,6 +813,182 @@ class Curriculum {
         ],
       ));
     }
+    units.addAll(_earUnits(p, std));
     return units;
+  }
+
+  /// The ear path: the open strings, then notes on one string, then
+  /// intervals.
+  static List<Unit> _earUnits(String p, Instrument std) {
+    final low = std.stringLabel(0);
+    final next = std.stringLabel(1);
+    final n = std.stringCount;
+    final half = (n + 1) ~/ 2;
+    final lower = {for (var s = 0; s < half; s++) s};
+    final upper = {for (var s = half; s < n; s++) s};
+    final all = {for (var s = 0; s < n; s++) s};
+    String names(Set<int> ss) => ss.map(std.stringLabel).join(', ');
+    String count(int k) => switch (k) {
+          2 => 'two',
+          3 => 'three',
+          4 => 'four',
+          5 => 'five',
+          6 => 'six',
+          7 => 'seven',
+          _ => '$k',
+        };
+    final open = '$p-ear-open';
+    const string = {DrillMode.earString};
+    final find = '$p-ear-find';
+    final iv = '$p-ear-intervals';
+    const note = {DrillMode.earNote};
+    const interval = {DrillMode.earInterval};
+    return [
+      Unit(
+        id: open,
+        track: Track.ear,
+        title: 'The open strings',
+        description: 'Hear an open string and say which one it is.',
+        lessons: [
+          Lesson(
+            id: '$open-a',
+            unitId: open,
+            title: 'The ${count(lower.length)} lowest strings',
+            subtitle: names(lower),
+            instrument: std,
+            modes: string,
+            strings: lower,
+            questionCount: 8,
+          ),
+          Lesson(
+            id: '$open-b',
+            unitId: open,
+            title: 'The ${count(upper.length)} highest strings',
+            subtitle: names(upper),
+            instrument: std,
+            modes: string,
+            strings: upper,
+            questionCount: 8,
+          ),
+          Lesson(
+            id: '$open-c',
+            unitId: open,
+            title: 'All ${count(n)} strings',
+            subtitle: 'Lowest to highest',
+            instrument: std,
+            modes: string,
+            strings: all,
+            questionCount: 10,
+          ),
+          Lesson(
+            id: '$open-test',
+            unitId: open,
+            title: 'Open strings test',
+            subtitle: 'Every string',
+            instrument: std,
+            modes: string,
+            strings: all,
+            isTest: true,
+            questionCount: 12,
+            passScore: 0.8,
+          ),
+        ],
+      ),
+      Unit(
+        id: find,
+        track: Track.ear,
+        title: 'Find the note by ear',
+        description:
+            'Hear the open string, then a note on it, and find the fret.',
+        lessons: [
+          Lesson(
+            id: '$find-a',
+            unitId: find,
+            title: 'The $low string, frets 0–5',
+            subtitle: 'Small jumps, and the open string again',
+            instrument: std,
+            modes: note,
+            strings: const {0},
+            maxFret: 5,
+            questionCount: 8,
+          ),
+          Lesson(
+            id: '$find-b',
+            unitId: find,
+            title: 'The $low string, frets 0–12',
+            subtitle: 'Up to the octave',
+            instrument: std,
+            modes: note,
+            strings: const {0},
+            questionCount: 10,
+          ),
+          Lesson(
+            id: '$find-c',
+            unitId: find,
+            title: 'The $next string, frets 0–12',
+            subtitle: 'The same jumps from a new open string',
+            instrument: std,
+            modes: note,
+            strings: const {1},
+            questionCount: 10,
+          ),
+          Lesson(
+            id: '$find-test',
+            unitId: find,
+            title: 'Find the note test',
+            subtitle: 'Both strings, frets 0–12',
+            instrument: std,
+            modes: note,
+            strings: const {0, 1},
+            isTest: true,
+            questionCount: 12,
+            passScore: 0.8,
+          ),
+        ],
+      ),
+      Unit(
+        id: iv,
+        track: Track.ear,
+        title: 'Octaves, fifths and fourths',
+        description: 'The most open-sounding intervals, up one string.',
+        lessons: [
+          Lesson(
+            id: '$iv-a',
+            unitId: iv,
+            title: 'Octave and fifth',
+            subtitle: '12 and 7 frets up',
+            instrument: std,
+            modes: interval,
+            strings: const {0},
+            intervals: const {7, 12},
+            questionCount: 8,
+          ),
+          Lesson(
+            id: '$iv-b',
+            unitId: iv,
+            title: 'Add the fourth',
+            subtitle: '5, 7 and 12 frets up',
+            instrument: std,
+            modes: interval,
+            strings: const {0, 1},
+            intervals: const {5, 7, 12},
+            questionCount: 10,
+          ),
+          Lesson(
+            id: '$iv-test',
+            unitId: iv,
+            title: 'Octaves, fifths and fourths test',
+            subtitle: 'Any of the three, three strings',
+            instrument: std,
+            modes: interval,
+            strings: const {0, 1, 2},
+            intervals: const {5, 7, 12},
+            isTest: true,
+            questionCount: 12,
+            passScore: 0.8,
+          ),
+        ],
+      ),
+    ];
   }
 }

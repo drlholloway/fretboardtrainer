@@ -14,6 +14,7 @@ class Settings {
     this.unlockAll = false,
     this.focusWeakSpots = true,
     this.soundOn = true,
+    this.learnTrack = Track.fretboard,
     this.drillModes = const {DrillMode.fretToNote, DrillMode.noteToFret},
     this.drillMaxFret = 12,
     this.drillNaturalsOnly = false,
@@ -45,6 +46,9 @@ class Settings {
 
   /// Play the note or chord once a question is answered.
   final bool soundOn;
+
+  /// Which path the Learn tab shows.
+  final Track learnTrack;
 
   // Remembered free-drill options.
   final Set<DrillMode> drillModes;
@@ -83,6 +87,7 @@ class Settings {
     bool? unlockAll,
     bool? focusWeakSpots,
     bool? soundOn,
+    Track? learnTrack,
     Set<DrillMode>? drillModes,
     int? drillMaxFret,
     bool? drillNaturalsOnly,
@@ -100,6 +105,7 @@ class Settings {
     unlockAll: unlockAll ?? this.unlockAll,
     focusWeakSpots: focusWeakSpots ?? this.focusWeakSpots,
     soundOn: soundOn ?? this.soundOn,
+    learnTrack: learnTrack ?? this.learnTrack,
     drillModes: drillModes ?? this.drillModes,
     drillMaxFret: drillMaxFret ?? this.drillMaxFret,
     drillNaturalsOnly: drillNaturalsOnly ?? this.drillNaturalsOnly,
@@ -133,6 +139,9 @@ class SettingsNotifier extends Notifier<Settings> {
       unlockAll: p.getBool('unlockAll') ?? false,
       focusWeakSpots: p.getBool('focusWeakSpots') ?? true,
       soundOn: p.getBool('soundOn') ?? true,
+      learnTrack:
+          Track.values.asNameMap()[p.getString('learnTrack')] ??
+          Track.fretboard,
       drillModes: {
         for (final m
             in p.getStringList('drillModes') ??
@@ -172,6 +181,7 @@ class SettingsNotifier extends Notifier<Settings> {
     await p.setBool('unlockAll', s.unlockAll);
     await p.setBool('focusWeakSpots', s.focusWeakSpots);
     await p.setBool('soundOn', s.soundOn);
+    await p.setString('learnTrack', s.learnTrack.name);
     await p.setStringList('drillModes', [for (final m in s.drillModes) m.name]);
     await p.setInt('drillMaxFret', s.drillMaxFret);
     await p.setBool('drillNaturalsOnly', s.drillNaturalsOnly);

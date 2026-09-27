@@ -4,6 +4,7 @@ import 'package:meta/meta.dart';
 
 import 'chords.dart';
 import 'instrument.dart';
+import 'intervals.dart';
 import 'octaves.dart';
 import 'pitch.dart';
 import 'stats.dart';
@@ -13,13 +14,19 @@ enum DrillMode {
   noteToFret('Note → Fret', 'See a note, pick where it is'),
   octave('Octave shapes', 'See a note on one string, find it on a higher one'),
   chordToName('Chord → Name', 'See a chord shape, pick its name'),
-  nameToChord('Name → Chord', 'See a chord name, pick its shape');
+  nameToChord('Name → Chord', 'See a chord name, pick its shape'),
+  earString('Hear → String', 'Hear an open string; say which one'),
+  earNote('Hear → Fret', 'Hear the open string, then a note; find it'),
+  earInterval('Hear an interval', 'Hear two notes; find the second');
 
   const DrillMode(this.label, this.description);
   final String label;
   final String description;
 
   bool get isChord => this == chordToName || this == nameToChord;
+
+  /// Answered by ear: the question is played, not shown.
+  bool get isEar => this == earString || this == earNote || this == earInterval;
 }
 
 /// What a drill or lesson asks. Note settings apply to the note modes and
@@ -43,6 +50,7 @@ class DrillConfig {
     this.minRootFret = 0,
     this.maxRootFret = 12,
     this.octaveShapes,
+    this.intervals,
     this.choiceCount = 4,
   }) : assert(modes.length > 0);
 
@@ -66,6 +74,9 @@ class DrillConfig {
   /// Octave drills: which string pairs to ask about (null = every shape on
   /// the instrument).
   final List<OctaveShape>? octaveShapes;
+
+  /// Interval drills: which intervals to ask, in semitones (null = 1–12).
+  final Set<int>? intervals;
 
   final int choiceCount;
 
@@ -93,6 +104,7 @@ class DrillConfig {
         minRootFret: minRootFret,
         maxRootFret: maxRootFret ?? this.maxRootFret,
         octaveShapes: octaveShapes,
+        intervals: intervals,
         choiceCount: choiceCount,
       );
 
@@ -124,6 +136,25 @@ class DrillConfig {
                         .isNatural))
               (shape, f),
       ];
+
+  /// Every position the find-it-by-ear drill may play: the note drills'
+  /// positions within the octave, the open string itself included.
+  List<FretPosition> get earNotePositions => [
+        for (final p in notePositions)
+          if (p.fret <= 12) p
+      ];
+
+  /// Every (root, semitones) the interval drill may play, up one string.
+  /// Roots stay low enough that there are wrong frets to choose from.
+  List<(FretPosition, int)> get intervalPrompts {
+    final top = maxFret < 12 ? maxFret : 12;
+    return [
+      for (final s in stringList)
+        for (final iv in intervals ?? {for (var i = 1; i <= 12; i++) i})
+          for (var r = minFret; r + iv <= top && r <= top - choiceCount; r++)
+            (FretPosition(s, r), iv),
+    ];
+  }
 
   /// Every voicing the chord drills may ask about.
   List<ChordVoicing> get chordVoicings {
@@ -322,6 +353,123 @@ class NameToChordQuestion extends Question {
 /// Looks up the tally for a stat key ([StatKeys.statKey]); null if unseen.
 typedef StatLookup = FactStats? Function(String statKey);
 
+/// Hear one open string; pick which string it was.
+class EarStringQuestion extends Question {
+  const EarStringQuestion({
+    required this.instrument,
+    required this.string,
+    required this.choices,
+    required this.correctIndex,
+  });
+
+  final Instrument instrument;
+  final int string;
+
+  /// Strings, lowest first.
+  final List<int> choices;
+  @override
+  final int correctIndex;
+
+  int get answer => choices[correctIndex];
+  FretPosition get position => FretPosition(string, 0);
+
+  @override
+  DrillMode get mode => DrillMode.earString;
+  @override
+  int get choiceCount => choices.length;
+  @override
+  String get promptKey => 'earS:$string';
+
+  @override
+  String explain(Accidentals acc) {
+    final label = instrument.stringLabel(string, acc);
+    final n = instrument.stringNumber(string);
+    return 'That was the open $label string, string $n.';
+  }
+}
+
+/// Hear the open string, then a note on it (possibly the open string
+/// again); pick the fret it was.
+class EarNoteQuestion extends Question {
+  const EarNoteQuestion({
+    required this.instrument,
+    required this.position,
+    required this.choices,
+    required this.correctIndex,
+  });
+
+  final Instrument instrument;
+
+  /// The note played (after the open string).
+  final FretPosition position;
+
+  /// Frets on the same string.
+  final List<FretPosition> choices;
+  @override
+  final int correctIndex;
+
+  FretPosition get answer => choices[correctIndex];
+  FretPosition get reference => FretPosition(position.string, 0);
+
+  @override
+  DrillMode get mode => DrillMode.earNote;
+  @override
+  int get choiceCount => choices.length;
+  @override
+  String get promptKey => 'earN:$position';
+
+  @override
+  String explain(Accidentals acc) {
+    final s = instrument.stringLabel(position.string, acc);
+    final name = instrument.pitchAt(position).pitchClass.name(acc);
+    if (position.isOpen) {
+      return 'That was $name again: the open $s string both times.';
+    }
+    return 'That was $name, fret ${position.fret} on the $s string: '
+        'a ${Intervals.name(position.fret)} above the open string.';
+  }
+}
+
+/// Hear a shown root note, then a second note up the same string; pick
+/// where the second note is.
+class EarIntervalQuestion extends Question {
+  const EarIntervalQuestion({
+    required this.instrument,
+    required this.root,
+    required this.semitones,
+    required this.choices,
+    required this.correctIndex,
+  });
+
+  final Instrument instrument;
+  final FretPosition root;
+  final int semitones;
+
+  /// Frets above the root on the same string.
+  final List<FretPosition> choices;
+  @override
+  final int correctIndex;
+
+  FretPosition get answer => choices[correctIndex];
+
+  @override
+  DrillMode get mode => DrillMode.earInterval;
+  @override
+  int get choiceCount => choices.length;
+  @override
+  String get promptKey => 'earI:$root:$semitones';
+
+  @override
+  String explain(Accidentals acc) {
+    final s = instrument.stringLabel(root.string, acc);
+    final from = instrument.pitchAt(root).pitchClass.name(acc);
+    final to = instrument.pitchAt(answer).pitchClass.name(acc);
+    final frets = semitones == 1 ? '1 fret' : '$semitones frets';
+    return 'A ${Intervals.name(semitones)}: $frets up the $s string, '
+        'from $from to $to.';
+  }
+}
+
 /// Produces questions for a [DrillConfig]. Deterministic for a given seed.
 ///
 /// With [stats], picks are weighted by [repetitionWeight] so missed, slow
@@ -338,9 +486,15 @@ class DrillGenerator {
     _positions = config.notePositions;
     _voicings = config.chordVoicings;
     _octaves = config.octavePrompts;
+    _earStrings = config.stringList;
+    _earNotes = config.earNotePositions;
+    _intervals = config.intervalPrompts;
     _modes = config.modes.where((m) {
       if (m.isChord) return _voicings.isNotEmpty;
       if (m == DrillMode.octave) return _octaves.isNotEmpty;
+      if (m == DrillMode.earString) return _earStrings.length > 1;
+      if (m == DrillMode.earNote) return _earNotes.isNotEmpty;
+      if (m == DrillMode.earInterval) return _intervals.isNotEmpty;
       return _positions.isNotEmpty;
     }).toList();
     if (_modes.isEmpty) {
@@ -355,6 +509,9 @@ class DrillGenerator {
   late final List<FretPosition> _positions;
   late final List<ChordVoicing> _voicings;
   late final List<(OctaveShape, int)> _octaves;
+  late final List<int> _earStrings;
+  late final List<FretPosition> _earNotes;
+  late final List<(FretPosition, int)> _intervals;
   late final List<DrillMode> _modes;
   String? _lastKey;
   int _modeCursor = 0;
@@ -374,6 +531,9 @@ class DrillGenerator {
         DrillMode.octave => _octave(),
         DrillMode.chordToName => _chordToName(),
         DrillMode.nameToChord => _nameToChord(),
+        DrillMode.earString => _earString(),
+        DrillMode.earNote => _earNote(),
+        DrillMode.earInterval => _earInterval(),
       };
     } while (q.promptKey == _lastKey && ++tries < 8);
     _lastKey = q.promptKey;
@@ -571,5 +731,98 @@ class DrillGenerator {
       choices: distractors,
       correctIndex: idx,
     );
+  }
+
+  EarStringQuestion _earString() {
+    final s = _pickFor(
+      _earStrings,
+      (s) => positionStatKey(DrillMode.earString, FretPosition(s, 0)),
+    );
+    // Every string in the lesson, lowest first, so the order sticks too.
+    return EarStringQuestion(
+      instrument: instrument,
+      string: s,
+      choices: _earStrings,
+      correctIndex: _earStrings.indexOf(s),
+    );
+  }
+
+  EarNoteQuestion _earNote() {
+    final pos = _pickFor(
+      _earNotes,
+      (p) => positionStatKey(DrillMode.earNote, p),
+    );
+    // Wrong frets on the same string: the lesson's own first, nearest
+    // first, then any other fret in range (the open string included).
+    final own = _shuffled(
+      _earNotes.where((p) => p.string == pos.string && p != pos),
+    )..sort((a, b) =>
+        (a.fret - pos.fret).abs().compareTo((b.fret - pos.fret).abs()));
+    // Stay on the part of the string the lesson covers (at least 5 frets).
+    final top = config.maxFret.clamp(5, 12);
+    final more = _shuffled([
+      for (var f = 0; f <= top; f++)
+        if (f != pos.fret) FretPosition(pos.string, f),
+    ])
+      ..sort((a, b) =>
+          (a.fret - pos.fret).abs().compareTo((b.fret - pos.fret).abs()));
+    final distractors = <FretPosition>[];
+    for (final p in [...own.take(3), ...more]) {
+      if (distractors.length >= config.choiceCount - 1) break;
+      if (!distractors.contains(p)) distractors.add(p);
+    }
+    distractors.sort((a, b) => a.fret.compareTo(b.fret));
+    final idx = _insertSorted(distractors, pos);
+    return EarNoteQuestion(
+      instrument: instrument,
+      position: pos,
+      choices: distractors,
+      correctIndex: idx,
+    );
+  }
+
+  EarIntervalQuestion _earInterval() {
+    final (root, iv) = _pickFor(
+      _intervals,
+      (p) => intervalStatKey(p.$2),
+    );
+    final top = config.maxFret < 12 ? config.maxFret : 12;
+    final asked = config.intervals ?? const <int>{};
+    // Other intervals from the lesson first, then the nearest ones.
+    final others = [
+      for (var d = 1; root.fret + d <= top; d++)
+        if (d != iv) d,
+    ]..sort((a, b) {
+        final byLesson =
+            (asked.contains(a) ? 0 : 1).compareTo(asked.contains(b) ? 0 : 1);
+        if (byLesson != 0) return byLesson;
+        return (a - iv).abs().compareTo((b - iv).abs());
+      });
+    final picked = others.take(config.choiceCount - 1).toList()..sort();
+    final choices = [
+      for (final d in picked) FretPosition(root.string, root.fret + d),
+    ];
+    final idx = _insertSorted(
+      choices,
+      FretPosition(root.string, root.fret + iv),
+    );
+    return EarIntervalQuestion(
+      instrument: instrument,
+      root: root,
+      semitones: iv,
+      choices: choices,
+      correctIndex: idx,
+    );
+  }
+
+  /// Inserts [p] among frets sorted along the string, so the choices read
+  /// left to right; returns its index.
+  int _insertSorted(List<FretPosition> sorted, FretPosition p) {
+    var i = 0;
+    while (i < sorted.length && sorted[i].fret < p.fret) {
+      i++;
+    }
+    sorted.insert(i, p);
+    return i;
   }
 }
