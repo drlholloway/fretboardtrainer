@@ -58,7 +58,7 @@ becomes the GitHub Release notes.
   never the same one twice in a row: Mothman on lead guitar, Bigfoot on
   bass, Nessie on her own neck, the Jersey Devil on banjo, the Jackalope on
   ukulele and El Chupacabra on acoustic. Tap to skip.
-- **Privacy policy** ([PRIVACY.md](PRIVACY.md)), linked from Settings →
+- **Privacy policy** ([PRIVACY.md](https://github.com/drlholloway/fretboardtrainer/blob/main/PRIVACY.md)), linked from Settings →
   About: nothing is collected or sent; settings, progress and stats stay on
   the device.
 
