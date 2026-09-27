@@ -83,7 +83,8 @@ open a screen directly.
   zip and the Linux tarball / AppImage / Flatpak, and publishes the release
   with the changelog section as notes. iOS ships through TestFlight, not the Releases page.
 - Android signing: `apps/fretboard_trainer/android/app/fretboardtrainer-release.jks`
-  and `key.properties` next to it, both gitignored, mirrored in the repo
+  and `apps/fretboard_trainer/android/key.properties` (where Gradle reads it),
+  both gitignored, mirrored in the repo
   secrets `ANDROID_KEYSTORE_BASE64`, `ANDROID_KEYSTORE_PASSWORD`,
   `ANDROID_KEY_ALIAS` (`fretman`), `ANDROID_KEY_PASSWORD`. The keystore is
   PKCS12, so the key password equals the store password. Never regenerate it.
