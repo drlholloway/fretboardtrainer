@@ -5,23 +5,34 @@ becomes the GitHub Release notes.
 
 ## Unreleased
 
+## 0.4.0 — 2026-09-27
+
 ### Added
-- **Ear training**, a second path on the Learn tab (switch between
-  Fretboard and Ear at the top). You hear notes and answer on the
-  fretboard, so the sound is tied to where your hand goes:
-  - *The open strings*: hear one open string and pick which it is, the
-    lower strings first, then the higher ones, then all of them.
-  - *Find the note by ear*: the open string plays, then a note on it,
-    sometimes the open string again; pick the fret (or open). The low
-    string frets 0–5, then 0–12, then the next string, then a test.
-  - *Octaves, fifths and fourths*: a shown note plays, then one higher on
-    the same string; pick where. The fifth and octave first, then the
-    fourth, then a test on three strings.
-  Each lesson starts with cards where you tap to hear the examples, and
-  every question has Play again. The two new question types are also in
-  the free drill, and spaced repetition covers them. Ear training needs
-  sound: with sound off the path says so and offers to turn it on, and on
-  iPhone and iPad it reminds you to check the silent switch.
+- **Ear training**, a second path on the Learn tab: switch between
+  **Fretboard** and **Ear** at the top. You hear notes and answer on the
+  fretboard, so each sound is tied to where your hand goes. Guitar and bass
+  both get it.
+  - *The open strings*: one open string plays; pick which it is. The lower
+    strings first, then the higher ones, then all of them, then a test.
+  - *Find the note by ear*: the open string plays, then a note on the same
+    string, sometimes the open string again; pick the fret, or open. The
+    low string frets 0–5, then 0–12, then the next string, then a test.
+  - *Octaves, fifths and fourths*: a note you can see plays, then one
+    higher on the same string; pick where it is. The fifth and octave
+    first, then the fourth, then a test across three strings.
+
+  Every lesson starts with cards where you tap to hear the examples, every
+  question has **Play again**, and after you answer the fretboard shows the
+  notes and the explanation names the interval.
+- The three ear question types (**Hear → String**, **Hear → Fret**, **Hear an
+  interval**) are also in the free drill, and spaced repetition brings back
+  the strings, frets and intervals you miss.
+
+### Changed
+- The Learn tab remembers which path you were on.
+- Ear training needs sound: with sound off the Ear path says so and offers
+  to turn it on, and on iPhone and iPad it reminds you to check the silent
+  switch, since iOS doesn't let apps see it.
 
 ## 0.3.0 — 2026-09-22
 
