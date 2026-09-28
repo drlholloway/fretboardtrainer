@@ -3,7 +3,7 @@
 Fretboard Trainer: learn the notes and chords on a guitar or bass fretboard.
 
 This is the plain tarball build. The Releases page also has an AppImage
-(`fretboardtrainer-linux-x64-<version>.AppImage`: make it executable and run it)
+(`Fretman-<version>-x86_64.AppImage`: make it executable and run it)
 and a Flatpak bundle (`fretboardtrainer-linux-x64-<version>.flatpak`: brings its
 own GTK, installs with `flatpak install --user <file>`).
 

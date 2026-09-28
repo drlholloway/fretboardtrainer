@@ -18,6 +18,12 @@ install -m644 "$ROOT/apps/fretboard_trainer/assets/icon/icon_512.png" "$APPDIR/u
 install -m644 "$ROOT/apps/fretboard_trainer/assets/icon/icon_512.png" "$APPDIR/fretman.png"
 install -m644 "$ROOT/packaging/flatpak/dev.laneholloway.Fretman.metainfo.xml" "$APPDIR/usr/share/metainfo/fretman.appdata.xml"
 mkdir -p "$OUT"
-ARCH=x86_64 VERSION="$VERSION" "$TOOL" --appimage-extract-and-run -n "$APPDIR" "$OUT/fretboardtrainer-linux-x64-$VERSION.AppImage" 2>/dev/null \
-  || ARCH=x86_64 VERSION="$VERSION" "$TOOL" -n "$APPDIR" "$OUT/fretboardtrainer-linux-x64-$VERSION.AppImage"
-ls -la "$OUT"/fretboardtrainer-linux-x64-"$VERSION".AppImage
+# Named like the Sightings AppImage. Embedded update information lets
+# AppImageUpdate fetch the newest release; appimagetool writes the matching
+# .zsync next to the image, and both are published with the release.
+NAME="Fretman-$VERSION-x86_64.AppImage"
+UPDATE="gh-releases-zsync|drlholloway|fretboardtrainer|latest|Fretman-*x86_64.AppImage.zsync"
+cd "$OUT"
+ARCH=x86_64 VERSION="$VERSION" "$TOOL" --appimage-extract-and-run -n -u "$UPDATE" "$APPDIR" "$NAME" 2>/dev/null \
+  || ARCH=x86_64 VERSION="$VERSION" "$TOOL" -n -u "$UPDATE" "$APPDIR" "$NAME"
+ls -la "$NAME" "$NAME.zsync"

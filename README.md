@@ -22,7 +22,7 @@ Ready-made builds are on the
 |---|---|---|
 | Android | `fretboardtrainer-android-<version>.apk` | Open the APK on the phone; allow installs from the browser once. |
 | macOS | `fretboardtrainer-macos-<version>.zip` | Not notarized: on first launch use System Settings → Privacy & Security → **Open Anyway**. |
-| Linux x86-64 (AppImage) | `fretboardtrainer-linux-x64-<version>.AppImage` | `chmod +x`, run. Needs GTK 3 (and `libfuse2` on some distributions). |
+| Linux x86-64 (AppImage) | `Fretman-<version>-x86_64.AppImage` | `chmod +x`, run. Needs GTK 3 (and `libfuse2` on some distributions). AppImageUpdate can update it in place. |
 | Linux x86-64 (Flatpak) | `fretboardtrainer-linux-x64-<version>.flatpak` | `flatpak install --user <file>` (needs the Flathub remote for the runtime). |
 | Linux x86-64 (tarball) | `fretboardtrainer-linux-x64-<version>.tar.gz` | Extract, run `./fretboard_trainer`. Needs GTK 3. |
 | iOS | TestFlight / App Store | Not on the Releases page. |

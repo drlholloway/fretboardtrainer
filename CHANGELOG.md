@@ -21,6 +21,9 @@ becomes the GitHub Release notes.
   - Both question types are in the free drill too.
 
 ### Changed
+- The Linux AppImage is now `Fretman-<version>-x86_64.AppImage`, named like
+  the Sightings one, and carries update information: AppImageUpdate (or
+  any tool that reads it) can update it in place from the Releases page.
 - **Find the note by ear** now covers every string the same way: frets 0–5,
   then 0–12, from the lowest string to the highest, with the test across
   all of them. Lessons you finished in 0.4.0 stay finished (their ids are

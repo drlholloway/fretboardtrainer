@@ -58,7 +58,8 @@ jobs:
           path: |
             fretboardtrainer-linux-x64-*.tar.gz
             fretboardtrainer-linux-x64-*.flatpak
-            fretboardtrainer-linux-x64-*.AppImage
+            Fretman-*-x86_64.AppImage
+            Fretman-*-x86_64.AppImage.zsync
 
   android:
     needs: version
@@ -146,7 +147,7 @@ jobs:
 
           **macOS** (Apple silicon and Intel): unzip and open the app. The build is not notarized, so on first launch macOS will refuse; open System Settings → Privacy & Security and click **Open Anyway** (older macOS: right-click the app → Open).
 
-          **Linux** (x86-64), three options. AppImage: `chmod +x fretboardtrainer-linux-x64-<version>.AppImage` and run it (needs GTK 3 from your distribution and `libfuse2` on some systems). Flatpak: `flatpak install --user fretboardtrainer-linux-x64-<version>.flatpak` (add the Flathub remote first if you haven't: `flatpak remote-add --user --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo`). Tarball: extract and run `./fretboard_trainer`; needs GTK 3.
+          **Linux** (x86-64), three options. AppImage: `chmod +x Fretman-<version>-x86_64.AppImage` and run it (needs GTK 3 from your distribution and `libfuse2` on some systems); AppImageUpdate can update it in place. Flatpak: `flatpak install --user fretboardtrainer-linux-x64-<version>.flatpak` (add the Flathub remote first if you haven't: `flatpak remote-add --user --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo`). Tarball: extract and run `./fretboard_trainer`; needs GTK 3.
 
           **iOS**: not on the Releases page; it ships through TestFlight and the App Store.
 

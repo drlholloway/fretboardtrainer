@@ -4,7 +4,9 @@ iOS and Android app for learning the notes and chords on a guitar or bass
 fretboard: quick multiple-choice drills plus a Duolingo-style learning path.
 Product name **Fretman**, subtitle Fretboard Trainer; internal identifiers
 (`fretboard_trainer` package, `dev.laneholloway.fretboard_trainer` bundle id,
-`fretboardtrainer-*` release files) stay as they are.
+`fretboardtrainer-*` release files) stay as they are. The one exception is
+the AppImage, named like Sightings': `Fretman-<version>-x86_64.AppImage`
+with a `.zsync` beside it for AppImageUpdate.
 
 Read `PLAN.md` first; it is the design and status. `CHANGELOG.md` is the
 release history and becomes the GitHub release notes.
