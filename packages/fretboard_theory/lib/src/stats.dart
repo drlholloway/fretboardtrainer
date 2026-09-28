@@ -26,14 +26,22 @@ extension StatKeys on Question {
       };
 
   String get statKey {
-    if (this case EarIntervalQuestion(:final semitones)) {
-      return intervalStatKey(semitones);
+    switch (this) {
+      case EarIntervalQuestion(:final semitones):
+        return intervalStatKey(semitones);
+      case AllPositionsQuestion(:final mode, :final target) ||
+            EarAllPositionsQuestion(:final mode, :final target):
+        return pitchStatKey(mode, target.midi);
+      default:
     }
     final p = statPosition;
     if (p != null) return positionStatKey(mode, p);
     return voicingStatKey(mode, statVoicing!);
   }
 }
+
+/// Every-place questions are tallied by the exact pitch asked.
+String pitchStatKey(DrillMode mode, int midi) => '${mode.name}:midi$midi';
 
 /// Intervals are tallied by size, wherever on the neck they were played.
 String intervalStatKey(int semitones) =>

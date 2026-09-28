@@ -132,8 +132,25 @@ the answer; stats key on the position and on the interval size. Teach cards
 (`EarTeachCard`) have a chip per example that plays it. `EarNotice` asks
 for sound when it is off and, on iOS (which cannot read the switch),
 reminds about the silent switch. Lesson ids are `<p>-ear-open-*`,
-`<p>-ear-find-*` and `<p>-ear-intervals-*`. Still to come: thirds and the other intervals,
+`<p>-ear-find-*` and `<p>-ear-intervals-*`. Find the note has two lessons
+per string (frets 0–5, 0–12); the lowest string keeps `find-a`/`find-b`
+and the second string's 0–12 lesson keeps `find-c` from 0.4.0, the others
+are `find-s<string>-a|b`. Still to come: thirds and the other intervals,
 cross-string shapes, chord quality, interval stats.
+
+### Every place (multi-select)
+
+`Question.multiSelect` / `correctIndices` / `isRightSet`: a question can
+have several right choices. `AllPositionsQuestion` (seen: staff and name)
+and `EarAllPositionsQuestion` (heard: open string, then the note) ask for
+every place in frets 0–12 that sounds one exact pitch; only pitches with
+two or more places are asked. The marks are the right places plus wrong
+ones up to six to eight: the same name an octave away first, then a fret
+off a right place. `DrillRunner` toggles picks and answers on Check (right
+only if the set is exact); the reveal greens every right place, reds wrong
+picks and plays the right places in turn. Stats key on the pitch
+(`pitchStatKey`). Units: `<p>-everywhere-*` after The whole fretboard and
+`<p>-ear-everywhere-*` after Find the note by ear.
 
 ## 3. Testing and tooling
 

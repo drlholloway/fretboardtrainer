@@ -14,6 +14,7 @@ void main() {
         'The B string',
         'The high E string',
         'The whole fretboard',
+        'Every place a note lives',
         'Open chords',
         'Power chords',
         'Barre chords',
@@ -30,6 +31,7 @@ void main() {
         'The D string',
         'The G string',
         'The whole fretboard',
+        'Every place a note lives',
         'Power chords',
         'Drop D',
       ]);

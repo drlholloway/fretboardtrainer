@@ -46,6 +46,9 @@ Free practice with five question types, any mix:
 - **Chord → Name**: a chord shape; pick its name.
 - **Name → Chord**: a chord name; pick its shape.
 
+- **Note → Every place** and **Hear → Every place**: a note shown or
+  played; select every place on the neck that sounds exactly it.
+
 Options: fret range, natural notes only, which strings, which chord families
 (open, power, barre), and 10 / 20 / 50 / endless questions.
 

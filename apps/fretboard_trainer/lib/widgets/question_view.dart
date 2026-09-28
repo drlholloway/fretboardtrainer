@@ -17,6 +17,8 @@ class QuestionView extends StatelessWidget {
     required this.accidentals,
     this.leftHanded = false,
     this.onListen,
+    this.picks = const {},
+    this.revealed = false,
   });
 
   final Question question;
@@ -28,7 +30,17 @@ class QuestionView extends StatelessWidget {
   /// Replays an ear question's sound.
   final VoidCallback? onListen;
 
-  static const _letters = ['A', 'B', 'C', 'D', 'E', 'F'];
+  /// Multi-select questions: the choices toggled on so far.
+  final Set<int> picks;
+
+  /// Multi-select questions: answered, so show what was right.
+  final bool revealed;
+
+  static const _picked = Color(0xFF3B6FB6);
+
+  bool get _locked => question.multiSelect ? revealed : selected != null;
+
+  static const _letters = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'];
 
   @override
   Widget build(BuildContext context) => switch (question) {
@@ -40,9 +52,17 @@ class QuestionView extends StatelessWidget {
     final EarStringQuestion q => _earString(context, q),
     final EarNoteQuestion q => _earNote(context, q),
     final EarIntervalQuestion q => _earInterval(context, q),
+    final AllPositionsQuestion q => _allPositions(context, q),
+    final EarAllPositionsQuestion q => _earAllPositions(context, q),
   };
 
   Color? _border(int i) {
+    if (question.multiSelect) {
+      if (!revealed) return picks.contains(i) ? _picked : null;
+      if (question.isCorrect(i)) return correctColor;
+      if (picks.contains(i)) return wrongColor;
+      return null;
+    }
     if (selected == null) return null;
     if (question.isCorrect(i)) return correctColor;
     if (i == selected) return wrongColor;
@@ -69,7 +89,7 @@ class QuestionView extends StatelessWidget {
         ),
         clipBehavior: Clip.antiAlias,
         child: InkWell(
-          onTap: selected == null ? () => onSelect(i) : null,
+          onTap: _locked ? null : () => onSelect(i),
           child: SizedBox(
             height: height,
             child: Padding(padding: const EdgeInsets.all(8), child: child),
@@ -426,6 +446,125 @@ class QuestionView extends StatelessWidget {
           ),
         ),
         _fretTiles(context, q.choices, from: q.root),
+      ],
+    );
+  }
+
+  /// Lettered marks for a multi-select question, toggled blue while
+  /// picking; once revealed every right place is green (picked or not) and
+  /// a wrong pick red.
+  List<FretMarker> _multiMarks(Instrument i, List<FretPosition> choices) => [
+    for (final (n, p) in choices.indexed)
+      FretMarker(
+        p,
+        label: revealed
+            ? i.pitchAt(p).pitchClass.name(accidentals)
+            : _letters[n],
+        color: _border(n) ?? markerColor,
+        textColor: _border(n) == null ? markerText : Colors.white,
+      ),
+  ];
+
+  Widget _multiTiles(
+    BuildContext context,
+    Instrument i,
+    List<FretPosition> choices,
+  ) => _grid([
+    for (final (n, p) in choices.indexed)
+      _choice(
+        context,
+        n,
+        // Large text settings shrink the two lines rather than overflow.
+        FittedBox(
+          fit: BoxFit.scaleDown,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                _letters[n],
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+              Text(
+                '${i.stringLabel(p.string, accidentals)} string, '
+                '${p.isOpen ? 'open' : 'fret ${p.fret}'}',
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+  ], aspect: 2.7);
+
+  Widget _hint(BuildContext context, String text) => Padding(
+    padding: const EdgeInsets.symmetric(vertical: 8),
+    child: Text(
+      text,
+      textAlign: TextAlign.center,
+      style: Theme.of(context).textTheme.bodyMedium,
+    ),
+  );
+
+  Widget _allPositions(BuildContext context, AllPositionsQuestion q) {
+    final i = q.instrument;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        _prompt(context, 'Select every place this note is'),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            StaffView.forInstrument(q.target, i, accidentals: accidentals),
+            const SizedBox(width: 16),
+            Text(
+              q.target.pitchClass.name(accidentals),
+              style: const TextStyle(fontSize: 44, fontWeight: FontWeight.w800),
+            ),
+          ],
+        ),
+        const SizedBox(height: 8),
+        FretboardView(
+          instrument: i,
+          lastFret: 12,
+          leftHanded: leftHanded,
+          markers: _multiMarks(i, q.choices),
+        ),
+        _hint(
+          context,
+          'This exact note, not the same name an octave away. '
+          'Tap each place, then Check.',
+        ),
+        _multiTiles(context, i, q.choices),
+      ],
+    );
+  }
+
+  Widget _earAllPositions(BuildContext context, EarAllPositionsQuestion q) {
+    final i = q.instrument;
+    final s = i.stringLabel(q.source.string, accidentals);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        _prompt(context, 'Select every place that note is'),
+        _listen(context),
+        FretboardView(
+          instrument: i,
+          lastFret: 12,
+          leftHanded: leftHanded,
+          markers: _multiMarks(i, q.choices),
+        ),
+        _hint(
+          context,
+          'The open $s string, then a note on it. Find it, then every other '
+          'place that sounds the same. Tap each one, then Check.',
+        ),
+        _multiTiles(context, i, q.choices),
       ],
     );
   }

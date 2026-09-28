@@ -49,7 +49,15 @@ class DrillRunner extends ConsumerStatefulWidget {
 class _DrillRunnerState extends ConsumerState<DrillRunner> {
   late DrillGenerator _gen;
   late Question _q;
+
+  /// The choice tapped on a single-answer question.
   int? _selected;
+
+  /// The choices toggled on a multi-select question, before Check.
+  final _picks = <int>{};
+
+  /// Null until the question is answered, then whether it was right.
+  bool? _ok;
   int _answered = 0;
   int _correct = 0;
   int _streak = 0;
@@ -86,11 +94,25 @@ class _DrillRunnerState extends ConsumerState<DrillRunner> {
   }
 
   void _select(int i) {
-    if (_selected != null) return;
-    final ok = _q.isCorrect(i);
+    if (_ok != null) return;
+    if (_q.multiSelect) {
+      setState(() => _picks.contains(i) ? _picks.remove(i) : _picks.add(i));
+      return;
+    }
+    _selected = i;
+    _answer(_q.isCorrect(i));
+  }
+
+  /// Multi-select: right only if exactly the right places are picked.
+  void _check() {
+    if (_ok != null || _picks.isEmpty) return;
+    _answer(_q.isRightSet(_picks));
+  }
+
+  void _answer(bool ok) {
     final time = _clock.elapsed;
     setState(() {
-      _selected = i;
+      _ok = ok;
       _answered++;
       if (ok) {
         _correct++;
@@ -122,6 +144,8 @@ class _DrillRunnerState extends ConsumerState<DrillRunner> {
     }
     setState(() {
       _selected = null;
+      _picks.clear();
+      _ok = null;
       _q = _gen.next();
     });
     _clock.reset();
@@ -136,8 +160,8 @@ class _DrillRunnerState extends ConsumerState<DrillRunner> {
   Widget build(BuildContext context) {
     final settings = ref.watch(settingsProvider);
     final theme = Theme.of(context);
-    final answered = _selected != null;
-    final wrong = answered && !_q.isCorrect(_selected!);
+    final answered = _ok != null;
+    final wrong = _ok == false;
     final total = widget.total;
 
     return Column(
@@ -179,6 +203,8 @@ class _DrillRunnerState extends ConsumerState<DrillRunner> {
               key: ValueKey(_q.promptKey + _answered.toString()),
               question: _q,
               selected: _selected,
+              picks: _picks,
+              revealed: answered,
               onSelect: _select,
               accidentals: settings.accidentals,
               leftHanded: settings.leftHanded,
@@ -216,7 +242,7 @@ class _DrillRunnerState extends ConsumerState<DrillRunner> {
                       ],
                     ),
                   ),
-                if (answered && !_q.isCorrect(_selected!))
+                if (wrong)
                   FilledButton(onPressed: _next, child: const Text('Continue'))
                 else if (answered)
                   FilledButton(
@@ -227,11 +253,25 @@ class _DrillRunnerState extends ConsumerState<DrillRunner> {
                     ),
                     child: const Text('Correct!'),
                   )
-                else if (total == null)
-                  OutlinedButton(
-                    onPressed: _answered == 0 ? null : _finish,
-                    child: const Text('Finish'),
-                  ),
+                else ...[
+                  if (_q.multiSelect)
+                    FilledButton(
+                      key: const ValueKey('check'),
+                      onPressed: _picks.isEmpty ? null : _check,
+                      child: Text(
+                        _picks.isEmpty
+                            ? 'Select every place'
+                            : 'Check (${_picks.length} selected)',
+                      ),
+                    ),
+                  if (total == null) ...[
+                    if (_q.multiSelect) const SizedBox(height: 8),
+                    OutlinedButton(
+                      onPressed: _answered == 0 ? null : _finish,
+                      child: const Text('Finish'),
+                    ),
+                  ],
+                ],
               ],
             ),
           ),

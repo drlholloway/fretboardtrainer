@@ -39,6 +39,11 @@ void main() {
       200,
       scrollable: find.byType(Scrollable).first,
     );
+    await Scrollable.ensureVisible(
+      tester.element(find.text('Start')),
+      alignment: 0.5,
+    );
+    await tester.pumpAndSettle();
     await tester.tap(find.text('Start'));
     await tester.pumpAndSettle();
     expect(find.byKey(const ValueKey('choice0')), findsOneWidget);
@@ -300,6 +305,11 @@ void main() {
       200,
       scrollable: find.byType(Scrollable).first,
     );
+    await Scrollable.ensureVisible(
+      tester.element(find.text('Start')),
+      alignment: 0.5,
+    );
+    await tester.pumpAndSettle();
     await tester.tap(find.text('Start'));
     await tester.pumpAndSettle();
     await tester.tap(find.byKey(const ValueKey('choice0')));
@@ -463,5 +473,68 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.textContaining('may be on silent'), findsOneWidget);
     debugDefaultTargetPlatformOverride = null;
+  });
+
+  testWidgets('every place: toggle picks, Check, right only if all are', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(1170, 2532);
+    tester.view.devicePixelRatio = 3;
+    addTearDown(tester.view.reset);
+    SharedPreferences.setMockInitialValues({'unlockAll': true});
+    await tester.pumpWidget(const ProviderScope(child: FretboardTrainerApp()));
+    await tester.pumpAndSettle();
+    final title = find.text('Every place test');
+    await tester.scrollUntilVisible(
+      title,
+      300,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await Scrollable.ensureVisible(tester.element(title), alignment: 0.5);
+    await tester.pumpAndSettle();
+    await tester.tap(title);
+    await tester.pumpAndSettle();
+    expect(find.text('Select every place this note is'), findsOneWidget);
+
+    Question current() =>
+        tester.widget<QuestionView>(find.byType(QuestionView)).question;
+    final check = find.byKey(const ValueKey('check'));
+    Future<void> tapChoice(int i) async {
+      await tester.ensureVisible(find.byKey(ValueKey('choice$i')));
+      await tester.tap(find.byKey(ValueKey('choice$i')));
+      await tester.pump();
+    }
+
+    // Nothing picked: Check is off.
+    expect(tester.widget<FilledButton>(check).onPressed, isNull);
+
+    // Exactly the right places: correct.
+    final right = current().correctIndices.toList();
+    for (final i in right) {
+      await tapChoice(i);
+    }
+    // A wrong one toggled on and off again changes nothing.
+    final wrong = [
+      for (var i = 0; i < current().choiceCount; i++)
+        if (!current().isCorrect(i)) i,
+    ].first;
+    await tapChoice(wrong);
+    await tapChoice(wrong);
+    expect(find.text('Check (${right.length} selected)'), findsOneWidget);
+    await tester.tap(check);
+    await tester.pump();
+    expect(find.text('Correct!'), findsOneWidget);
+    await tester.pump(const Duration(milliseconds: 700));
+    await tester.pumpAndSettle();
+
+    // Missing one: wrong, and the explanation lists every place.
+    final next = current().correctIndices.toList();
+    for (final i in next.skip(1)) {
+      await tapChoice(i);
+    }
+    await tester.tap(check);
+    await tester.pump();
+    expect(find.text('Continue'), findsOneWidget);
+    expect(find.textContaining(' here is at '), findsOneWidget);
   });
 }

@@ -153,11 +153,14 @@ class Lesson {
   /// Interval lessons: which intervals, in semitones.
   final Set<int>? intervals;
 
-  bool get hasNotes =>
-      modes.any((m) => !m.isChord && !m.isEar && m != DrillMode.octave);
+  bool get hasNotes => modes.any(
+        (m) =>
+            !m.isChord && !m.isEar && !m.isMultiSelect && m != DrillMode.octave,
+      );
   bool get hasOctaves => modes.contains(DrillMode.octave);
   bool get hasChords => modes.any((m) => m.isChord);
   bool get isEar => modes.any((m) => m.isEar);
+  bool get hasSamePitch => modes.any((m) => m.isMultiSelect);
 
   DrillConfig get config => DrillConfig(
         instrument: instrument,
@@ -201,6 +204,9 @@ class Lesson {
           cards.add(_stringCard(s, acc));
         }
       }
+    }
+    if (hasSamePitch) {
+      cards.add(_samePitchCard(acc));
     }
     if (modes.contains(DrillMode.earString)) {
       cards.add(_openStringsCard(acc));
@@ -273,6 +279,50 @@ class Lesson {
       minFret: minFret,
       maxFret: maxFret,
       naturalsOnly: naturalsOnly,
+    );
+  }
+
+  EarTeachCard _samePitchCard(Accidentals acc) {
+    final c = config;
+    // The example: the lowest natural note with the most places.
+    final prompts =
+        c.samePitchPrompts.where((p) => p.pitchClass.isNatural).toList();
+    var best = prompts.first;
+    for (final p in prompts) {
+      if (c.samePitchPositions(p.midi).length >
+          c.samePitchPositions(best.midi).length) {
+        best = p;
+      }
+    }
+    final places = c.samePitchPositions(best.midi)
+      ..sort((a, b) => a.string.compareTo(b.string));
+    final name = best.pitchClass.name(acc);
+    String where(FretPosition p) =>
+        '${p.isOpen ? 'open' : 'fret ${p.fret}'} on the '
+        '${instrument.stringLabel(p.string, acc)} string';
+    final octave = [
+      for (final s in c.stringList)
+        for (var f = 0; f <= 12; f++)
+          if (instrument.pitchAt(FretPosition(s, f)).midi == best.midi - 12)
+            FretPosition(s, f),
+    ];
+    final ear = modes.contains(DrillMode.earAllPositions);
+    return EarTeachCard(
+      title: 'One note, several places',
+      body: 'The same note lives on more than one string. This $name is at '
+          '${places.map(where).join(', ')}: tap them and hear that they are '
+          'the same note. '
+          '${octave.isEmpty ? '' : 'The $name at ${where(octave.first)} is an octave lower: same name, different note, so it does not count. '}'
+          '${ear ? 'Each question plays the open string and a note on it; ' : 'Each question shows a note; '}'
+          'select every place it is, then Check.',
+      examples: [
+        for (final p in places)
+          EarExample(
+            target: p,
+            label: '${instrument.stringLabel(p.string, acc)} string · '
+                '${p.isOpen ? 'open' : 'fret ${p.fret}'}',
+          ),
+      ],
     );
   }
 
@@ -631,6 +681,50 @@ class Curriculum {
       ],
     ));
 
+    // Every place a note lives: only once the whole fretboard is open.
+    {
+      final uid = '$p-everywhere';
+      const every = {DrillMode.allPositions};
+      units.add(Unit(
+        id: uid,
+        title: 'Every place a note lives',
+        description:
+            'The same note on several strings: find every one of them.',
+        lessons: [
+          Lesson(
+            id: '$uid-a',
+            unitId: uid,
+            title: 'Natural notes',
+            subtitle: 'Select every place, frets 0–12',
+            instrument: std,
+            modes: every,
+            naturalsOnly: true,
+            questionCount: 8,
+          ),
+          Lesson(
+            id: '$uid-b',
+            unitId: uid,
+            title: 'Every note',
+            subtitle: 'Sharps and flats too',
+            instrument: std,
+            modes: every,
+            questionCount: 8,
+          ),
+          Lesson(
+            id: '$uid-test',
+            unitId: uid,
+            title: 'Every place test',
+            subtitle: 'Ten notes, 80% to pass',
+            instrument: std,
+            modes: every,
+            isTest: true,
+            questionCount: 10,
+            passScore: 0.8,
+          ),
+        ],
+      ));
+    }
+
     if (kind == InstrumentKind.guitar) {
       final uid = '$p-open';
       Lesson open(String id, String title, String subtitle,
@@ -820,8 +914,6 @@ class Curriculum {
   /// The ear path: the open strings, then notes on one string, then
   /// intervals.
   static List<Unit> _earUnits(String p, Instrument std) {
-    final low = std.stringLabel(0);
-    final next = std.stringLabel(1);
     final n = std.stringCount;
     final half = (n + 1) ~/ 2;
     final lower = {for (var s = 0; s < half; s++) s};
@@ -901,47 +993,78 @@ class Curriculum {
         description:
             'Hear the open string, then a note on it, and find the fret.',
         lessons: [
-          Lesson(
-            id: '$find-a',
-            unitId: find,
-            title: 'The $low string, frets 0–5',
-            subtitle: 'Small jumps, and the open string again',
-            instrument: std,
-            modes: note,
-            strings: const {0},
-            maxFret: 5,
-            questionCount: 8,
-          ),
-          Lesson(
-            id: '$find-b',
-            unitId: find,
-            title: 'The $low string, frets 0–12',
-            subtitle: 'Up to the octave',
-            instrument: std,
-            modes: note,
-            strings: const {0},
-            questionCount: 10,
-          ),
-          Lesson(
-            id: '$find-c',
-            unitId: find,
-            title: 'The $next string, frets 0–12',
-            subtitle: 'The same jumps from a new open string',
-            instrument: std,
-            modes: note,
-            strings: const {1},
-            questionCount: 10,
-          ),
+          // Two lessons per string, lowest string first. Ids from 0.4.0
+          // (find-a, find-b for the lowest string, find-c for the second
+          // string's 0-12 lesson, find-test) are kept so progress carries
+          // over; the rest are find-s<string>-<a|b>.
+          for (var s = 0; s < n; s++) ...[
+            Lesson(
+              id: s == 0 ? '$find-a' : '$find-s$s-a',
+              unitId: find,
+              title: 'The ${std.stringLabel(s)} string, frets 0–5',
+              subtitle: s == 0
+                  ? 'Small jumps, and the open string again'
+                  : 'Small jumps from the open ${std.stringLabel(s)}',
+              instrument: std,
+              modes: note,
+              strings: {s},
+              maxFret: 5,
+              questionCount: 8,
+            ),
+            Lesson(
+              id: switch (s) {
+                0 => '$find-b',
+                1 => '$find-c',
+                _ => '$find-s$s-b',
+              },
+              unitId: find,
+              title: 'The ${std.stringLabel(s)} string, frets 0–12',
+              subtitle: 'Up to the octave',
+              instrument: std,
+              modes: note,
+              strings: {s},
+              questionCount: 10,
+            ),
+          ],
           Lesson(
             id: '$find-test',
             unitId: find,
             title: 'Find the note test',
-            subtitle: 'Both strings, frets 0–12',
+            subtitle: 'Every string, frets 0–12',
             instrument: std,
             modes: note,
-            strings: const {0, 1},
+            strings: all,
             isTest: true,
-            questionCount: 12,
+            questionCount: 16,
+            passScore: 0.8,
+          ),
+        ],
+      ),
+      Unit(
+        id: '$p-ear-everywhere',
+        track: Track.ear,
+        title: 'The same note, other strings',
+        description: 'Hear a note, then find every place it lives.',
+        lessons: [
+          Lesson(
+            id: '$p-ear-everywhere-a',
+            unitId: '$p-ear-everywhere',
+            title: 'Natural notes',
+            subtitle: 'Select every place, frets 0–12',
+            instrument: std,
+            modes: const {DrillMode.earAllPositions},
+            naturalsOnly: true,
+            questionCount: 8,
+          ),
+          Lesson(
+            id: '$p-ear-everywhere-test',
+            unitId: '$p-ear-everywhere',
+            title: 'Every place by ear test',
+            subtitle: 'Every note, 80% to pass',
+            instrument: std,
+            modes: const {DrillMode.earAllPositions},
+            isTest: true,
+            questionCount: 10,
             passScore: 0.8,
           ),
         ],

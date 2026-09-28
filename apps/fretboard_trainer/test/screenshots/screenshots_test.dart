@@ -279,6 +279,11 @@ void main() {
       300,
       scrollable: find.byType(Scrollable).first,
     );
+    await Scrollable.ensureVisible(
+      tester.element(find.text('Start')),
+      alignment: 0.5,
+    );
+    await tester.pumpAndSettle();
     await tester.tap(find.text('Start'));
     await shot(tester, 'wiki-drill-bass');
   }, skip: !enabled);
@@ -385,5 +390,59 @@ void main() {
     await open('Add the fourth');
     await tester.tap(find.text('Skip'));
     await shot(tester, 'ear-interval');
+  }, skip: !enabled);
+
+  testWidgets('every place', (tester) async {
+    await phone(tester);
+    Future<void> open(String title, {String track = 'fretboard'}) async {
+      await tester.pumpWidget(const SizedBox());
+      SharedPreferences.setMockInitialValues({
+        'unlockAll': true,
+        'learnTrack': track,
+      });
+      await tester.pumpWidget(
+        const ProviderScope(child: FretboardTrainerApp()),
+      );
+      await tester.pumpAndSettle();
+      await tester.scrollUntilVisible(
+        find.text(title),
+        300,
+        scrollable: find.byType(Scrollable).first,
+      );
+      await Scrollable.ensureVisible(
+        tester.element(find.text(title)),
+        alignment: 0.5,
+      );
+      await tester.pumpAndSettle();
+      await tester.tap(find.text(title));
+      await tester.pumpAndSettle();
+    }
+
+    Question current() =>
+        tester.widget<QuestionView>(find.byType(QuestionView)).question;
+    Future<void> pick(int i) async {
+      await tester.ensureVisible(find.byKey(ValueKey('choice$i')));
+      await tester.tap(find.byKey(ValueKey('choice$i')));
+      await tester.pump();
+    }
+
+    await open('Every place test');
+    await shot(tester, 'every-place');
+    // One right place and one wrong one, then Check: the reveal.
+    final q = current();
+    await pick(q.correctIndices.first);
+    await pick(
+      [
+        for (var i = 0; i < q.choiceCount; i++)
+          if (!q.isCorrect(i)) i,
+      ].first,
+    );
+    await shot(tester, 'every-place-picked');
+    await tester.tap(find.byKey(const ValueKey('check')));
+    await tester.pump();
+    await shot(tester, 'every-place-revealed');
+
+    await open('Every place by ear test', track: 'ear');
+    await shot(tester, 'ear-every-place');
   }, skip: !enabled);
 }

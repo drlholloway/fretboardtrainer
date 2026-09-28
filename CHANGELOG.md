@@ -5,6 +5,27 @@ becomes the GitHub Release notes.
 
 ## Unreleased
 
+### Added
+- **Every place a note lives**: a new kind of question where more than one
+  answer is right. A note is shown (fretboard path) or played (ear path),
+  and you select every place on the neck that sounds exactly it, then
+  Check. It counts only if you find them all and nothing else; the same
+  note name an octave away is there to catch you out. After Check every
+  place is played in turn so you hear it is the same note.
+  - Fretboard path: a new unit, *Every place a note lives*, right after
+    *The whole fretboard* (natural notes, every note, test). If you have
+    already passed the whole fretboard it becomes your next lesson;
+    everything you have done stays done.
+  - Ear path: a new unit, *The same note, other strings*, right after
+    *Find the note by ear*.
+  - Both question types are in the free drill too.
+
+### Changed
+- **Find the note by ear** now covers every string the same way: frets 0–5,
+  then 0–12, from the lowest string to the highest, with the test across
+  all of them. Lessons you finished in 0.4.0 stay finished (their ids are
+  kept); the new lessons slot in where they belong.
+
 ## 0.4.0 — 2026-09-27
 
 ### Added

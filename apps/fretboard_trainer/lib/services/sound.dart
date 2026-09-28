@@ -63,6 +63,9 @@ class Sound {
   static const strumGap = Duration(milliseconds: 35);
   static const phraseGap = Duration(milliseconds: 450);
 
+  /// Between the places that sound the same note, so each can be heard.
+  static const placesGap = Duration(milliseconds: 380);
+
   SampleMap? _map;
   Future<void>? _ready;
 
@@ -139,6 +142,12 @@ class Sound {
       [root, answer],
       gap: phraseGap,
     ),
+    EarAllPositionsQuestion(
+      :final instrument,
+      :final reference,
+      :final source,
+    ) =>
+      play(instrument, [reference, source], gap: phraseGap),
     _ => Future.value(),
   };
 
@@ -162,6 +171,14 @@ class Sound {
     EarStringQuestion() ||
     EarNoteQuestion() ||
     EarIntervalQuestion() => prompt(q),
+    // Every right place in turn, lowest string first: the same note each
+    // time.
+    AllPositionsQuestion(:final instrument, :final answers) ||
+    EarAllPositionsQuestion(:final instrument, :final answers) => play(
+      instrument,
+      answers.toList()..sort((a, b) => a.string.compareTo(b.string)),
+      gap: placesGap,
+    ),
   };
 
   Future<void> strum(ChordVoicing v) => play(

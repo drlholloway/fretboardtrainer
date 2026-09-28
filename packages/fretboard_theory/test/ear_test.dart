@@ -53,6 +53,21 @@ void main() {
       );
     });
 
+    test('every-string test: choices never sound the same note', () {
+      final lesson =
+          Curriculum(InstrumentKind.guitar, 6).lessonById('g6-ear-find-test')!;
+      final strings = <int>{};
+      for (final q in ask<EarNoteQuestion>(lesson.config, 500)) {
+        strings.add(q.position.string);
+        // All on the string that was played...
+        expect(q.choices.every((c) => c.string == q.position.string), isTrue);
+        // ...so no two choices share a sounding pitch.
+        final pitches = {for (final c in q.choices) guitar.pitchAt(c).midi};
+        expect(pitches, hasLength(q.choices.length));
+      }
+      expect(strings, {0, 1, 2, 3, 4, 5});
+    });
+
     test('explains the jump from the open string', () {
       final q = EarNoteQuestion(
         instrument: guitar,
@@ -154,6 +169,7 @@ void main() {
         expect(c.unitsIn(Track.ear).map((u) => u.title), [
           'The open strings',
           'Find the note by ear',
+          'The same note, other strings',
           'Octaves, fifths and fourths',
         ]);
         // Lower half, upper half, then every string.
@@ -177,6 +193,39 @@ void main() {
         );
       });
     }
+
+    test('find the note: two lessons per string, 0.4.0 ids kept', () {
+      for (final (kind, n) in [
+        (InstrumentKind.guitar, 6),
+        (InstrumentKind.bass, 4),
+      ]) {
+        final c = Curriculum(kind, n);
+        final find = c.unitsIn(Track.ear)[1].lessons;
+        expect(find, hasLength(2 * n + 1));
+        for (var s = 0; s < n; s++) {
+          expect(find[2 * s].strings, {s});
+          expect(find[2 * s].maxFret, 5);
+          expect(find[2 * s + 1].strings, {s});
+          expect(find[2 * s + 1].maxFret, 12);
+        }
+        expect(find.last.isTest, isTrue);
+        expect(find.last.strings, hasLength(n));
+      }
+      final ids = [
+        for (final l in Curriculum(InstrumentKind.guitar, 6)
+            .unitsIn(Track.ear)[1]
+            .lessons)
+          l.id,
+      ];
+      expect(ids.take(4), [
+        'g6-ear-find-a',
+        'g6-ear-find-b',
+        'g6-ear-find-s1-a',
+        'g6-ear-find-c',
+      ]);
+      expect(ids[4], 'g6-ear-find-s2-a');
+      expect(ids.last, 'g6-ear-find-test');
+    });
 
     test('teach cards play examples on the lesson string', () {
       final c = Curriculum(InstrumentKind.guitar, 6);

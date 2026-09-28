@@ -17,7 +17,12 @@ enum DrillMode {
   nameToChord('Name → Chord', 'See a chord name, pick its shape'),
   earString('Hear → String', 'Hear an open string; say which one'),
   earNote('Hear → Fret', 'Hear the open string, then a note; find it'),
-  earInterval('Hear an interval', 'Hear two notes; find the second');
+  earInterval('Hear an interval', 'Hear two notes; find the second'),
+  allPositions('Note → Every place', 'See a note, select every place it is'),
+  earAllPositions(
+    'Hear → Every place',
+    'Hear a note, select every place it is',
+  );
 
   const DrillMode(this.label, this.description);
   final String label;
@@ -26,7 +31,14 @@ enum DrillMode {
   bool get isChord => this == chordToName || this == nameToChord;
 
   /// Answered by ear: the question is played, not shown.
-  bool get isEar => this == earString || this == earNote || this == earInterval;
+  bool get isEar =>
+      this == earString ||
+      this == earNote ||
+      this == earInterval ||
+      this == earAllPositions;
+
+  /// Several choices can be right; the learner picks them all.
+  bool get isMultiSelect => this == allPositions || this == earAllPositions;
 }
 
 /// What a drill or lesson asks. Note settings apply to the note modes and
@@ -156,6 +168,46 @@ class DrillConfig {
     ];
   }
 
+  /// Frets the every-place questions cover: the note range, up to 12.
+  int get _samePitchTop => maxFret < 12 ? maxFret : 12;
+
+  /// Every position in range that sounds exactly [midi].
+  List<FretPosition> samePitchPositions(int midi) => [
+        for (final s in stringList)
+          for (var f = minFret; f <= _samePitchTop; f++)
+            if (instrument.pitchAt(FretPosition(s, f)).midi == midi)
+              FretPosition(s, f),
+      ];
+
+  /// Pitches the see-it-find-it-everywhere drill may ask: those that live
+  /// in at least two places in range.
+  List<Pitch> get samePitchPrompts {
+    final byMidi = <int, int>{};
+    for (final s in stringList) {
+      for (var f = minFret; f <= _samePitchTop; f++) {
+        final p = instrument.pitchAt(FretPosition(s, f));
+        if (naturalsOnly && !p.pitchClass.isNatural) continue;
+        byMidi[p.midi] = (byMidi[p.midi] ?? 0) + 1;
+      }
+    }
+    return [
+      for (final e in byMidi.entries)
+        if (e.value >= 2) Pitch(e.key),
+    ]..sort((a, b) => a.midi.compareTo(b.midi));
+  }
+
+  /// Positions the hear-it-find-it-everywhere drill may play: any whose
+  /// pitch lives in at least two places in range.
+  List<FretPosition> get samePitchSources {
+    final asked = {for (final p in samePitchPrompts) p.midi};
+    return [
+      for (final s in stringList)
+        for (var f = minFret; f <= _samePitchTop; f++)
+          if (asked.contains(instrument.pitchAt(FretPosition(s, f)).midi))
+            FretPosition(s, f),
+    ];
+  }
+
   /// Every voicing the chord drills may ask about.
   List<ChordVoicing> get chordVoicings {
     final shapes = chordShapes;
@@ -185,7 +237,18 @@ sealed class Question {
   int get correctIndex;
   int get choiceCount;
 
-  bool isCorrect(int index) => index == correctIndex;
+  /// Every right choice: just [correctIndex], except for multi-select
+  /// questions, which have several.
+  Set<int> get correctIndices => {correctIndex};
+
+  bool get multiSelect => mode.isMultiSelect;
+
+  bool isCorrect(int index) => correctIndices.contains(index);
+
+  /// Whether [picks] is exactly the set of right choices.
+  bool isRightSet(Set<int> picks) =>
+      picks.length == correctIndices.length &&
+      picks.containsAll(correctIndices);
 
   /// A key that identifies the prompt, used to avoid asking the same thing
   /// twice in a row.
@@ -470,6 +533,95 @@ class EarIntervalQuestion extends Question {
   }
 }
 
+/// Lists positions as "fret 7 on the D string, fret 2 on the G string and
+/// fret 12 on the A string", lowest string first.
+String _places(Instrument i, Iterable<FretPosition> ps, Accidentals acc) {
+  final sorted = ps.toList()..sort((a, b) => a.string.compareTo(b.string));
+  final parts = [
+    for (final p in sorted)
+      '${p.isOpen ? 'open' : 'fret ${p.fret}'} on the '
+          '${i.stringLabel(p.string, acc)} string',
+  ];
+  if (parts.length == 1) return parts.single;
+  return '${parts.sublist(0, parts.length - 1).join(', ')} and ${parts.last}';
+}
+
+/// See a note (on the staff and by name); select every place on the
+/// fretboard that sounds exactly it.
+class AllPositionsQuestion extends Question {
+  const AllPositionsQuestion({
+    required this.instrument,
+    required this.target,
+    required this.choices,
+    required this.correct,
+  });
+
+  final Instrument instrument;
+  final Pitch target;
+  final List<FretPosition> choices;
+
+  /// Indices of [choices] that sound [target].
+  final Set<int> correct;
+
+  @override
+  int get correctIndex => correct.reduce((a, b) => a < b ? a : b);
+  @override
+  Set<int> get correctIndices => correct;
+  @override
+  DrillMode get mode => DrillMode.allPositions;
+  @override
+  int get choiceCount => choices.length;
+  @override
+  String get promptKey => 'all:${target.midi}';
+
+  List<FretPosition> get answers => [for (final i in correct) choices[i]];
+
+  @override
+  String explain(Accidentals acc) =>
+      '${target.pitchClass.name(acc)} here is at '
+      '${_places(instrument, answers, acc)}.';
+}
+
+/// Hear the open string, then a note on it; select every place on the
+/// fretboard that sounds exactly that note, on any string.
+class EarAllPositionsQuestion extends Question {
+  const EarAllPositionsQuestion({
+    required this.instrument,
+    required this.source,
+    required this.choices,
+    required this.correct,
+  });
+
+  final Instrument instrument;
+
+  /// Where the note was played.
+  final FretPosition source;
+  final List<FretPosition> choices;
+  final Set<int> correct;
+
+  FretPosition get reference => FretPosition(source.string, 0);
+  Pitch get target => instrument.pitchAt(source);
+
+  @override
+  int get correctIndex => correct.reduce((a, b) => a < b ? a : b);
+  @override
+  Set<int> get correctIndices => correct;
+  @override
+  DrillMode get mode => DrillMode.earAllPositions;
+  @override
+  int get choiceCount => choices.length;
+  @override
+  String get promptKey => 'earAll:$source';
+
+  List<FretPosition> get answers => [for (final i in correct) choices[i]];
+
+  @override
+  String explain(Accidentals acc) => 'That was ${target.pitchClass.name(acc)}, '
+      '${source.isOpen ? 'the open' : 'fret ${source.fret} on the'} '
+      '${instrument.stringLabel(source.string, acc)} string. The same note is '
+      'at ${_places(instrument, answers, acc)}.';
+}
+
 /// Produces questions for a [DrillConfig]. Deterministic for a given seed.
 ///
 /// With [stats], picks are weighted by [repetitionWeight] so missed, slow
@@ -489,12 +641,16 @@ class DrillGenerator {
     _earStrings = config.stringList;
     _earNotes = config.earNotePositions;
     _intervals = config.intervalPrompts;
+    _samePitch = config.samePitchPrompts;
+    _samePitchSources = config.samePitchSources;
     _modes = config.modes.where((m) {
       if (m.isChord) return _voicings.isNotEmpty;
       if (m == DrillMode.octave) return _octaves.isNotEmpty;
       if (m == DrillMode.earString) return _earStrings.length > 1;
       if (m == DrillMode.earNote) return _earNotes.isNotEmpty;
       if (m == DrillMode.earInterval) return _intervals.isNotEmpty;
+      if (m == DrillMode.allPositions) return _samePitch.isNotEmpty;
+      if (m == DrillMode.earAllPositions) return _samePitchSources.isNotEmpty;
       return _positions.isNotEmpty;
     }).toList();
     if (_modes.isEmpty) {
@@ -512,6 +668,8 @@ class DrillGenerator {
   late final List<int> _earStrings;
   late final List<FretPosition> _earNotes;
   late final List<(FretPosition, int)> _intervals;
+  late final List<Pitch> _samePitch;
+  late final List<FretPosition> _samePitchSources;
   late final List<DrillMode> _modes;
   String? _lastKey;
   int _modeCursor = 0;
@@ -534,6 +692,8 @@ class DrillGenerator {
         DrillMode.earString => _earString(),
         DrillMode.earNote => _earNote(),
         DrillMode.earInterval => _earInterval(),
+        DrillMode.allPositions => _allPositions(),
+        DrillMode.earAllPositions => _earAllPositions(),
       };
     } while (q.promptKey == _lastKey && ++tries < 8);
     _lastKey = q.promptKey;
@@ -824,5 +984,75 @@ class DrillGenerator {
     }
     sorted.insert(i, p);
     return i;
+  }
+
+  AllPositionsQuestion _allPositions() {
+    final target = _pickFor(
+      _samePitch,
+      (p) => pitchStatKey(DrillMode.allPositions, p.midi),
+    );
+    final (choices, correct) = _samePitchChoices(target.midi);
+    return AllPositionsQuestion(
+      instrument: instrument,
+      target: target,
+      choices: choices,
+      correct: correct,
+    );
+  }
+
+  EarAllPositionsQuestion _earAllPositions() {
+    final source = _pickFor(
+      _samePitchSources,
+      (p) =>
+          pitchStatKey(DrillMode.earAllPositions, instrument.pitchAt(p).midi),
+    );
+    final (choices, correct) =
+        _samePitchChoices(instrument.pitchAt(source).midi);
+    return EarAllPositionsQuestion(
+      instrument: instrument,
+      source: source,
+      choices: choices,
+      correct: correct,
+    );
+  }
+
+  /// Every place that sounds [midi], plus wrong places to make six to
+  /// eight marks: the same note name an octave away first (the real trap),
+  /// then notes one fret off a right place. Sorted along the neck.
+  (List<FretPosition>, Set<int>) _samePitchChoices(int midi) {
+    final right = config.samePitchPositions(midi);
+    final top = config.maxFret < 12 ? config.maxFret : 12;
+    final wanted = (right.length + 4).clamp(6, 8);
+    final octaves = _shuffled([
+      for (final s in config.stringList)
+        for (var f = config.minFret; f <= top; f++)
+          if (instrument.pitchAt(FretPosition(s, f)) case final p
+              when p.midi != midi && (p.midi - midi) % 12 == 0)
+            FretPosition(s, f),
+    ]);
+    final nearby = _shuffled([
+      for (final r in right)
+        for (final f in [r.fret - 1, r.fret + 1])
+          if (f >= config.minFret && f <= top) FretPosition(r.string, f),
+    ]);
+    final wrong = <FretPosition>[];
+    for (final p in [...octaves.take(2), ...nearby, ...octaves.skip(2)]) {
+      if (right.length + wrong.length >= wanted) break;
+      if (!right.contains(p) &&
+          !wrong.contains(p) &&
+          instrument.pitchAt(p).midi != midi) {
+        wrong.add(p);
+      }
+    }
+    final all = [...right, ...wrong]..sort((a, b) => a.fret != b.fret
+        ? a.fret.compareTo(b.fret)
+        : b.string.compareTo(a.string));
+    return (
+      all,
+      {
+        for (final (i, p) in all.indexed)
+          if (right.contains(p)) i
+      }
+    );
   }
 }
