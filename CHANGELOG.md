@@ -5,6 +5,8 @@ becomes the GitHub Release notes.
 
 ## Unreleased
 
+## 0.5.0 — 2026-09-28
+
 ### Added
 - **Every place a note lives**: a new kind of question where more than one
   answer is right. A note is shown (fretboard path) or played (ear path),
