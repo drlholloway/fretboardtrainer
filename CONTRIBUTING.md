@@ -65,7 +65,8 @@ American spelling in code, UI text and docs. Chord names come from
 
 ## Licensing of contributions
 
-Fretboard Trainer is licensed under [PolyForm Shield 1.0.0](LICENSE). By
+Fretboard Trainer is licensed under the [GNU Affero General Public License,
+version 3 only](LICENSE). By
 submitting a contribution you agree that it is licensed under the same terms
 and that Cryptid Effects may include it in any edition of Fretboard Trainer,
 including a commercial one. Please do not submit code copied from projects
