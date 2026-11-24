@@ -132,7 +132,10 @@ Bug reports, wrong-answer reports with the notes you expected, fixes with
 tests and new chord shapes are all welcome. See
 [CONTRIBUTING.md](CONTRIBUTING.md) for the setup and the pull request
 checklist, [SECURITY.md](SECURITY.md) for reporting a security problem, and
-[LICENSE](LICENSE) for the terms (PolyForm Shield 1.0.0).
+[LICENSE](LICENSE) for the terms: the GNU Affero General Public License,
+version 3 only (AGPL-3.0-only), with the copyright notice in
+[NOTICE](NOTICE). Releases before 24 November 2026 were under PolyForm
+Shield 1.0.0.
 
 If the app helps you learn the neck, you can
 [buy me a coffee](https://buymeacoffee.com/drlholloway).

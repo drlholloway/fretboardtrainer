@@ -5,6 +5,11 @@ becomes the GitHub Release notes.
 
 ## Unreleased
 
+### Changed
+- **License:** now free software under the GNU Affero General Public
+  License, version 3 only (AGPL-3.0-only). Earlier releases remain under
+  the PolyForm Shield License 1.0.0.
+
 ## 0.5.0 — 2026-09-28
 
 ### Added

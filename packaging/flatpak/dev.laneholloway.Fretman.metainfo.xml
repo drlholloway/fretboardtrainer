@@ -5,7 +5,7 @@
   <summary>Fretboard Trainer: learn the notes and chords on guitar and bass</summary>
   <developer_name>Cryptid Effects</developer_name>
   <metadata_license>CC0-1.0</metadata_license>
-  <project_license>LicenseRef-PolyForm-Shield-1.0.0</project_license>
+  <project_license>AGPL-3.0-only</project_license>
   <description>
     <p>Quick multiple-choice drills for the fretboard: see a fret and name the note, see a note and find it, recognize chord shapes and name them, and find a note's octave on another string.</p>
     <p>A Duolingo-style learning path starts on the low E string and works through every string, the octave shapes, open chords, power chords, barre chords and drop D. Guitar (6 or 7 strings) and bass (4 to 6), with tuning presets, sharps or flats, and a left-handed fretboard.</p>
