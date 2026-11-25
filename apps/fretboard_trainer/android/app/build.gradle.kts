@@ -59,6 +59,7 @@ android {
             // build, written out: R8 shrinks and obfuscates the code.
             isMinifyEnabled = true
             isShrinkResources = true
+            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"))
         }
     }
 }
