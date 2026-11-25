@@ -1,6 +1,10 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- HTTPS only; the app makes no network calls of its own. Android's
+         backup stays on (the default) so progress follows the learner to a
+         new phone, as PRIVACY.md describes. -->
     <application
         android:label="Fretman"
+        android:usesCleartextTraffic="false"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity

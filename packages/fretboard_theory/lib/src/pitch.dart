@@ -65,7 +65,7 @@ class PitchClass {
   /// Parses `C`, `C#`, `Db`, `C♯`, `D♭` (case-insensitive letter).
   static PitchClass parse(String text) {
     final s = text.trim();
-    if (s.isEmpty) throw FormatException('empty pitch class');
+    if (s.isEmpty) throw const FormatException('empty pitch class');
     final letter = s[0].toUpperCase();
     final base =
         const {'C': 0, 'D': 2, 'E': 4, 'F': 5, 'G': 7, 'A': 9, 'B': 11}[letter];

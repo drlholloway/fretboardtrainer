@@ -226,9 +226,9 @@ void main() {
                 mutedStrings: const {5},
               ),
               FretboardView.chord(v),
-              StaffView(pitch: const Pitch(40), clef: Clef.treble),
-              StaffView(
-                pitch: const Pitch(28),
+              const StaffView(pitch: Pitch(40), clef: Clef.treble),
+              const StaffView(
+                pitch: Pitch(28),
                 clef: Clef.bass,
                 accidentals: Accidentals.flats,
               ),

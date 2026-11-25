@@ -55,6 +55,10 @@ android {
         release {
             signingConfig = if (hasReleaseKey) signingConfigs.getByName("release")
                             else signingConfigs.getByName("debug")
+            // What Flutter's Gradle plugin already does for a release
+            // build, written out: R8 shrinks and obfuscates the code.
+            isMinifyEnabled = true
+            isShrinkResources = true
         }
     }
 }

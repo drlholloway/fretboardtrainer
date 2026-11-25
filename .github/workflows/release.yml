@@ -8,8 +8,17 @@ on:
     tags: ['v*']
   workflow_dispatch:
 
+# Read-only by default; only the publish job may write (it makes the
+# release).
 permissions:
-  contents: write
+  contents: read
+
+# The Flutter that pubspec.lock was written with, since Flutter itself fixes
+# some package versions, and every job installs exactly the lockfile. After
+# upgrading Flutter on the dev machine: run `flutter pub get`, commit
+# pubspec.lock, and put the new version here and in test.yml.
+env:
+  FLUTTER_VERSION: 3.47.2
 
 jobs:
   version:
@@ -29,8 +38,9 @@ jobs:
       - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2.23.0
         with:
           channel: stable
+          flutter-version: ${{ env.FLUTTER_VERSION }}
       - run: sudo apt-get update && sudo apt-get install -y clang cmake ninja-build pkg-config libgtk-3-dev
-      - run: dart pub get
+      - run: flutter pub get --enforce-lockfile
       - run: cd apps/fretboard_trainer && flutter build linux --release
       - name: package
         run: |
@@ -41,7 +51,7 @@ jobs:
           tar czf $STAGE.tar.gz $STAGE
       - name: appimage
         run: |
-          curl -sSL -o appimagetool https://github.com/AppImage/appimagetool/releases/download/continuous/appimagetool-x86_64.AppImage
+          curl -sSL --proto '=https' --tlsv1.2 -o appimagetool https://github.com/AppImage/appimagetool/releases/download/continuous/appimagetool-x86_64.AppImage
           chmod +x appimagetool
           APPIMAGETOOL=$PWD/appimagetool packaging/appimage/build-appimage.sh apps/fretboard_trainer/build/linux/x64/release/bundle ${{ needs.version.outputs.version }} .
       - name: flatpak bundle
@@ -73,7 +83,8 @@ jobs:
       - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2.23.0
         with:
           channel: stable
-      - run: dart pub get
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+      - run: flutter pub get --enforce-lockfile
       - name: release signing key
         env:
           KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
@@ -107,7 +118,8 @@ jobs:
       - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2.23.0
         with:
           channel: stable
-      - run: dart pub get
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+      - run: flutter pub get --enforce-lockfile
       - run: cd apps/fretboard_trainer && flutter build macos --release
       - name: sign (ad hoc) and zip
         run: |
@@ -123,6 +135,8 @@ jobs:
   publish:
     needs: [version, linux, android, macos]
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
       - uses: actions/checkout@v7
       - uses: actions/download-artifact@v8
@@ -153,7 +167,7 @@ jobs:
 
           Full history: [CHANGELOG.md](https://github.com/drlholloway/fretboardtrainer/blob/main/CHANGELOG.md)
           EOF
-      - uses: softprops/action-gh-release@v3
+      - uses: softprops/action-gh-release@8a0cd651e5b2365bd640854a3fa5dfc70e4875f3 # v3.0.4
         with:
           name: Fretman ${{ needs.version.outputs.version }}
           body_path: notes.md
