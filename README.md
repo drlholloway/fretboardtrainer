@@ -1,6 +1,8 @@
 # Fretman
 ### Fretboard Trainer: an interactive guitar and bass fretboard training tool
 
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=drlholloway_fretboardtrainer&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=drlholloway_fretboardtrainer)
+
 **Fretman** (Mothman's musical cousin) is an Android, iOS, Linux and macOS app for learning the fretboard of
 guitars and basses through quick drills. It starts with single-note
 recognition in standard tuning, then non-standard tunings (drop D, C standard,
